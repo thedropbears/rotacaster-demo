@@ -1,6 +1,7 @@
 #include "Robot.h"
 #include "Commands/Command.h"
 #include "Commands/ExampleCommand.h"
+#include <lib-4774/Functions.h>
 
 void Robot::RobotInit()
 {
@@ -46,6 +47,9 @@ void Robot::TestPeriodic()
 }
 
 void Robot::PutDashboard() {
+    SmartDashboard::PutNumber("Roll (Deg)", lib4774::r2d(CommandBase::imu->GetRoll()));
+    SmartDashboard::PutNumber("Pitch (Deg)", lib4774::r2d(CommandBase::imu->GetPitch() ));
+    SmartDashboard::PutNumber("Yaw (Deg)", lib4774::r2d(CommandBase::imu->GetYaw()));
 
 }
 

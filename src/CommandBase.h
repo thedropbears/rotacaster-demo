@@ -6,6 +6,7 @@
 #include "Subsystems/ExampleSubsystem.h"
 #include "OI.h"
 #include "WPILib.h"
+#include <lib-4774/subsystems/Mpu6050.h>
 
 /**
  * The base for all commands. All atomic commands should subclass CommandBase.
@@ -20,6 +21,7 @@ public:
     static void init();
     // Create a single static instance of all of your subsystems
     static ExampleSubsystem *examplesubsystem;
+    static Mpu6050* imu;
     static OI *oi;
 };
 
