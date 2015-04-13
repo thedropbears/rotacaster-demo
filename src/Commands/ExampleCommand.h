@@ -7,12 +7,12 @@
 class ExampleCommand: public CommandBase
 {
 public:
-	ExampleCommand();
-	void Initialize();
-	void Execute();
-	bool IsFinished();
-	void End();
-	void Interrupted();
+    ExampleCommand();
+    void Initialize();
+    void Execute();
+    bool IsFinished();
+    void End();
+    void Interrupted();
 };
 
 #endif

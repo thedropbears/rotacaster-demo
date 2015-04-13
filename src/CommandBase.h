@@ -15,12 +15,12 @@
 class CommandBase: public Command
 {
 public:
-	CommandBase(char const *name);
-	CommandBase();
-	static void init();
-	// Create a single static instance of all of your subsystems
-	static ExampleSubsystem *examplesubsystem;
-	static OI *oi;
+    CommandBase(char const *name);
+    CommandBase();
+    static void init();
+    // Create a single static instance of all of your subsystems
+    static ExampleSubsystem *examplesubsystem;
+    static OI *oi;
 };
 
 #endif
