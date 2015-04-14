@@ -24,10 +24,15 @@
 class Chassis: public Subsystem
 {
 private:
+    CANTalon* motor_a;
+    CANTalon* motor_b;
+    CANTalon* motor_c;
+    CANTalon *motors[3];
 public:
     Chassis();
     ~Chassis();
     void Drive(double vX, double vY, double vZ, double throttle);
+    void PutDashboard();
 };
 
 #endif

@@ -20,4 +20,19 @@
 //const int RANGE_FINDER_PORT = 1;
 //const int RANGE_FINDER_MODULE = 1;
 
+/* these are the CAN bus ID mappings for the drive motors
+the letters go counter clockwise from the front of holly
+  ^
+  |
+
+  A
+ /  \
+B -- C  */
+const int DRIVE_MOTOR_A_ID = 1;
+const int DRIVE_MOTOR_B_ID = 2;
+const int DRIVE_MOTOR_C_ID = 3;
+
+// the max forward velocity as read off of the web configuration interface
+const int TALON_CLOSED_LOOP_MULTIPLIER = 472;
+
 #endif
