@@ -3,24 +3,15 @@
 
 #include "WPILib.h"
 
-/**
+/*
  * The RobotMap is a mapping from the ports sensors and actuators are wired into
  * to a variable name. This provides flexibility changing wiring, makes checking
- * the wiring easier and significantly reduces the number of magic numbers
- * floating around.
+ * the wiring easier. It also is a place to store software constants in one place
+ *  and significantly reduces the number of magic numbers floating around.
  */
 
-// For example to map the left and right motors, you could define the
-// following variables to use with your drivetrain subsystem.
-//const int LEFTMOTOR = 1;
-//const int RIGHTMOTOR = 2;
 
-// If you are using multiple modules, make sure to define both the port
-// number and the module. For example you with a rangefinder:
-//const int RANGE_FINDER_PORT = 1;
-//const int RANGE_FINDER_MODULE = 1;
-
-/* these are the CAN bus ID mappings for the drive motors
+/* These are the CAN bus ID mappings for the drive motors
 the letters go counter clockwise from the front of holly
   ^
   |
@@ -34,5 +25,24 @@ const int DRIVE_MOTOR_C_ID = 3;
 
 // the max forward velocity as read off of the web configuration interface
 const int TALON_CLOSED_LOOP_MULTIPLIER = 472;
+
+// These define the amount the joystick has to be pushed (relative to its max
+// push in that axis) where the push is not registered by the code so the
+// robot is not constantly moving from the driver's nudges.
+const double JOY_DRV_DEAD_X = 0.05;
+const double JOY_DRV_DEAD_Y = 0.05;
+const double JOY_DRV_DEAD_Z = 0.6;
+
+// These are the amount that each axis is scaled down by at all levels
+// (e.g. if the joystick is pushed to 0.5 and the scale is 0.5 the
+// output to the chassis' drive function is 0.25)
+const double JOYSTICK_X_SCALE = 1.0;
+const double JOYSTICK_Y_SCALE = 1.0;
+const double JOYSTICK_Z_SCALE = 1.0;
+
+// this is black magic. touch at own risk
+const double JOYSTICK_X_EXPONENTIAL = 10;
+const double JOYSTICK_Y_EXPONENTIAL = 10;
+const double JOYSTICK_Z_EXPONENTIAL = 40;
 
 #endif

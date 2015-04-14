@@ -47,10 +47,15 @@ void Robot::TestPeriodic()
 }
 
 void Robot::PutDashboard() {
+    // this is the hub of putting diagnostics to the dashboard ;)
     SmartDashboard::PutNumber("Roll (Deg)", lib4774::r2d(CommandBase::imu->GetRoll()));
     SmartDashboard::PutNumber("Pitch (Deg)", lib4774::r2d(CommandBase::imu->GetPitch() ));
     SmartDashboard::PutNumber("Yaw (Deg)", lib4774::r2d(CommandBase::imu->GetYaw()));
 
+    SmartDashboard::PutNumber("Joystick X: ", CommandBase::oi->getJoyDrvX());
+    SmartDashboard::PutNumber("Joystick Y: ", CommandBase::oi->getJoyDrvY());
+    SmartDashboard::PutNumber("Joystick Z: ", CommandBase::oi->getJoyDrvZ());
+    SmartDashboard::PutNumber("Throttle: ", CommandBase::oi->getJoyDrvThrottle());
 }
 
 START_ROBOT_CLASS(Robot);
