@@ -1,5 +1,7 @@
 #include "Chassis.h"
 #include <RobotMap.h>
+#include <lib-4774/Functions.h>
+#include <CommandBase.h>
 
 // These are the gains for the velocity PID on the wheels
 // this means that no matter what load the robot's wheels
@@ -37,6 +39,8 @@ Chassis::Chassis() : Subsystem("Chassis") {
         motors[i]->SetCloseLoopRampRate(0);
     }
 
+    // field orient by default
+    fieldOriented = true;
 }
 
 Chassis::~Chassis() {
@@ -53,7 +57,17 @@ void Chassis::Drive(double vX, double vY, double vZ, double throttle) {
     double mB;
     double mC;
 
-    // field orient etc here
+    // if field orientation is enabled
+    if(fieldOriented) {
+        // temporary array for fieldorient to act on
+        double result[2] = {0, 0};
+        // here we call lib-4774's fieldOrient function, which makes all inputs
+        // to drive be relative to the last place the gyro was reset/zeroed
+        lib4774::fieldOrient(vX, vY, CommandBase::imu->GetYaw(), result);
+        vX = result[0];
+        vY = result[1];
+    }
+
 
     // placeholders for motor equations
     mA = 0.0;
@@ -61,4 +75,8 @@ void Chassis::Drive(double vX, double vY, double vZ, double throttle) {
     mC = 0.0;
 
 
+}
+
+void Chassis::ToggleFieldOrient() {
+    fieldOriented = !fieldOriented;
 }

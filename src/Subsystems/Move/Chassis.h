@@ -28,11 +28,14 @@ private:
     CANTalon* motor_b;
     CANTalon* motor_c;
     CANTalon *motors[3];
+
+    bool fieldOriented;
 public:
     Chassis();
     ~Chassis();
     void Drive(double vX, double vY, double vZ, double throttle);
     void PutDashboard();
+    void ToggleFieldOrient();
 };
 
 #endif
