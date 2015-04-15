@@ -13,6 +13,7 @@ void Robot::RobotInit()
 void Robot::DisabledPeriodic()
 {
     Scheduler::GetInstance()->Run();
+    PutDashboard();
 }
 
 void Robot::AutonomousInit()
@@ -24,6 +25,7 @@ void Robot::AutonomousInit()
 void Robot::AutonomousPeriodic()
 {
     Scheduler::GetInstance()->Run();
+    PutDashboard();
 }
 
 void Robot::TeleopInit()
@@ -39,6 +41,7 @@ void Robot::TeleopInit()
 void Robot::TeleopPeriodic()
 {
     Scheduler::GetInstance()->Run();
+    PutDashboard();
 }
 
 void Robot::TestPeriodic()
@@ -56,6 +59,8 @@ void Robot::PutDashboard() {
     SmartDashboard::PutNumber("Joystick Y: ", CommandBase::oi->getJoyDrvY());
     SmartDashboard::PutNumber("Joystick Z: ", CommandBase::oi->getJoyDrvZ());
     SmartDashboard::PutNumber("Throttle: ", CommandBase::oi->getJoyDrvThrottle());
+
+    CommandBase::chassis->PutDashboard();
 }
 
 START_ROBOT_CLASS(Robot);

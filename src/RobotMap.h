@@ -45,4 +45,9 @@ const double JOYSTICK_X_EXPONENTIAL = 10;
 const double JOYSTICK_Y_EXPONENTIAL = 10;
 const double JOYSTICK_Z_EXPONENTIAL = 40;
 
+// the circumference on the wheels of the bot
+const double WHEEL_CIRCUMFERENCE = 39.2699081699; //cm
+// as per the motor spec
+const double ENCODER_COUNTS_PER_REVOLUTION = 7;
+
 #endif
