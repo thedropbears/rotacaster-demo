@@ -26,6 +26,12 @@ const int DRIVE_MOTOR_C_ID = 3;
 // the max forward velocity as read off of the web configuration interface
 const int TALON_CLOSED_LOOP_MULTIPLIER = 472;
 
+// these represent what buttons on the joystick do what (they are used in OI)
+const int GYRO_RESET_BUTTON = 11;
+const int FIELD_ORIENT_BUTTON = 12;
+const int TOGGLE_PID_BUTTON = 10;
+
+
 // These define the amount the joystick has to be pushed (relative to its max
 // push in that axis) where the push is not registered by the code so the
 // robot is not constantly moving from the driver's nudges.

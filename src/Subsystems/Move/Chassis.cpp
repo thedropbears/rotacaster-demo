@@ -241,6 +241,10 @@ bool Chassis::PIDEnabled() {
     return gyro_pid->IsEnabled();
 }
 
+bool Chassis::getFieldOriented() {
+    return fieldOriented;
+}
+
 void Chassis::SetHeading(double newHeading) {
     double newHead = atan2(sin(newHeading),cos(newHeading)); //wrap to +- PI
     gyro_pid->Reset();

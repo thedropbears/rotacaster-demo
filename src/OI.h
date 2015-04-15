@@ -17,6 +17,10 @@ class OI
 {
 private:
     Joystick* JoyDrv;
+
+    Button* gyroResetButton;
+    Button* fieldOrientButton;
+    Button* togglePIDButton;
 public:
     OI();
     Joystick* getJoyDrv();

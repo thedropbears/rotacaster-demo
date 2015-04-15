@@ -2,6 +2,10 @@
 #include <lib-4774/Functions.h>
 #include <RobotMap.h>
 
+#include <Commands/Gyro/ResetGyro.h>
+#include <Commands/Gyro/ToggleFieldDrive.h>
+#include <Commands/Gyro/TogglePID.h>
+
 OI::OI()
 {
     // initializing the joystick class to be device 0
@@ -9,6 +13,15 @@ OI::OI()
     // driver station
     JoyDrv = new Joystick(0);
     // Process operator interface input here.
+
+    gyroResetButton = new JoystickButton (JoyDrv, GYRO_RESET_BUTTON);
+    gyroResetButton->WhenPressed(new ResetGyro());
+
+    fieldOrientButton = new JoystickButton (JoyDrv, FIELD_ORIENT_BUTTON);
+    fieldOrientButton->WhenPressed(new ToggleFieldDrive());
+
+    togglePIDButton = new JoystickButton (JoyDrv, TOGGLE_PID_BUTTON);
+    togglePIDButton->WhenPressed(new TogglePID());
 }
 
 Joystick* OI::getJoyDrv() {

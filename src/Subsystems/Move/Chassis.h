@@ -67,6 +67,8 @@ public:
     // returns true if the PID is on
     bool PIDEnabled();
     // distance in centimeters since encoders were last zeroed
+    // get weather we are field oriented or not
+    bool getFieldOriented();
     void EncoderDistance(double*);
     // zero the encoders
     void ZeroEncoders();
