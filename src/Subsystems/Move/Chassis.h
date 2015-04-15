@@ -70,6 +70,7 @@ public:
     void EncoderDistance(double*);
     // zero the encoders
     void ZeroEncoders();
+    void InitDefaultCommand();
 };
 
 #endif

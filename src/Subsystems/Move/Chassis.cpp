@@ -3,6 +3,7 @@
 #include <lib-4774/Functions.h>
 #include <CommandBase.h>
 #include <math.h>
+#include <Commands/Move/OmniDrive.h>
 
 // These are the gains for the velocity PID on the wheels
 // this means that no matter what load the robot's wheels
@@ -79,6 +80,13 @@ Chassis::~Chassis() {
     for(int i = 0; i < 3; i++) {
         delete motors[i];
     }
+}
+
+void Chassis::InitDefaultCommand() {
+    // here we set the default command for the chassis subsystem
+    // to omni drive, the command that lets the driver control the
+    // robot
+    SetDefaultCommand(new OmniDrive());
 }
 
 void Chassis::Drive(double vX, double vY, double vZ, double throttle) {
