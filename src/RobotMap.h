@@ -2,6 +2,8 @@
 #define ROBOTMAP_H
 
 #include "WPILib.h"
+#include "math.h"
+#include <lib-4774/Functions.h>
 
 /*
  * The RobotMap is a mapping from the ports sensors and actuators are wired into
@@ -25,6 +27,9 @@ const int DRIVE_MOTOR_C_ID = 3;
 
 // the max forward velocity as read off of the web configuration interface
 const int TALON_CLOSED_LOOP_MULTIPLIER = 472;
+
+const double ROBOT_MAX_X_SPEED = sin(lib4774::d2r(60)); // approx 0.87 (root 2 over 3)
+const double ROBOT_MAX_Y_SPEED = cos(lib4774::d2r(60)); // 0.50
 
 // these represent what buttons on the joystick do what (they are used in OI)
 const int GYRO_RESET_BUTTON = 11;
@@ -56,5 +61,6 @@ const double WHEEL_CIRCUMFERENCE = 39.2699081699; //cm
 // 7 counts per rev of the motor * for for quad encoder
 // * 50 for gear reduction
 const double ENCODER_COUNTS_PER_REVOLUTION = 1400;
+
 
 #endif

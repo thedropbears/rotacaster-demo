@@ -139,10 +139,11 @@ void Chassis::Drive(double vX, double vY, double vZ, double throttle) {
 
     }
 
-    // placeholders for motor equations
-    mA = 0.0;
-    mB = 0.0;
-    mC = 0.0;
+    // these are the equations that translate the movements
+    // of the joystick into movements of the wheels
+    mA = ((0.0*vX) + (vY * ROBOT_MAX_Y_SPEED) + vZ);
+    mB = ((-vX * ROBOT_MAX_Y_SPEED /  ROBOT_MAX_X_SPEED) + (-vY * 1.0) + vZ);
+    mC = ((vX * ROBOT_MAX_Y_SPEED /  ROBOT_MAX_X_SPEED) + (-vY * 1.0) + vZ);
 
     double motorInput [] = {mA, mB, mC};
 
