@@ -25,4 +25,44 @@ class TestPid(unittest.TestCase):
         self.assertEqual(p.kI, 2.0)
         self.assertEqual(p.kD, 3.0)
         self.assertEqual(p.kF, 4.0)
-
+    
+    def test_pid_update(self):
+        #baseline test
+        output = PidOutput()
+        p = Pid(output, 0.0)
+        p.setPoint(0.0)
+        p.update(0)
+        self.assertEqual(output.correction, 0)
+        p.update(100)
+        self.assertEqual(output.correction, 0)
+        
+        #test kp is working
+        p = Pid(output, 1.0)
+        p.update(0)
+        self.assertEqual(output.correction, 0)
+        p.update(100)
+        self.assertEqual(output.correction, 1.0*-100)
+        p.update(0)
+        self.assertEqual(output.correction, 0)
+        
+        #test ki is working
+        p = Pid(output, 0.0, 1.0)
+        p.update(0)
+        self.assertEqual(output.correction, 0)
+        p.update(100)
+        p.update(50)
+        self.assertEqual(output.correction, 1.0*-150)
+        p.update(-150)
+        self.assertEqual(output.correction, 0)
+        
+        #test kd is working
+        p = Pid(output, 0.0, 0.0, 1.0)
+        p.update(0)
+        self.assertEqual(output.correction, 0)
+        p.update(100)
+        self.assertEqual(output.correction, -100)
+        p.update(0)
+        self.assertEqual(output.correction, 100)
+        p.update(0)
+        self.assertEqual(output.correction, 0)
+        
