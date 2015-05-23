@@ -55,6 +55,23 @@ class TestPid(unittest.TestCase):
         p.update(-150)
         self.assertEqual(output.correction, 0)
         
+        #test izone
+        p = Pid(output, 0.0, 1.0, izone=100)
+        p.update(0)
+        self.assertEqual(output.correction, 0)
+        p.update(100)
+        p.update(50)
+        self.assertEqual(output.correction, 1.0*-100)
+        p.update(-100)
+        self.assertEqual(output.correction, 0)
+        p.update(0)
+        self.assertEqual(output.correction, 0)
+        p.update(-100)
+        p.update(-50)
+        self.assertEqual(output.correction, 1.0*100)
+        p.update(100)
+        self.assertEqual(output.correction, 0)
+        
         #test kd is working
         p = Pid(output, 0.0, 0.0, 1.0)
         p.update(0)

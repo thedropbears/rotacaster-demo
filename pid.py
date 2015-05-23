@@ -1,6 +1,6 @@
 class Pid(object):
     """Class to run a PID control loop."""
-    def __init__(self, pid_output, kP, kI=0.0, kD=0.0, kF=0.0, set_point=0.0):
+    def __init__(self, pid_output, kP, kI=0.0, kD=0.0, kF=0.0, set_point=0.0, izone=None):
         if not(isinstance(pid_output, PidOutput)):
             raise Exception("Must pass in a PidOutput object")
         self.kP=kP
@@ -11,6 +11,7 @@ class Pid(object):
         self.integrator = 0.0
         self.output = pid_output
         self.set_point = set_point
+        self.izone = izone
     
     def update(self,current_value):
         """Calculate PID output value for given reference input and feedback"""
@@ -24,11 +25,11 @@ class Pid(object):
         #we add to the last i value so the error accumulates
         self.integrator += self.error
         
-        """
-        if self.Integrator > self.Integrator_max:
-            self.Integrator = self.Integrator_max
-        elif self.Integrator < self.Integrator_min:
-            self.Integrator = self.Integrator_min"""
+        if not self.izone == None: #the pythonic way
+            if self.integrator > self.izone:
+                self.integrator = self.izone
+            elif self.integrator < -self.izone:
+                self.integrator = -self.izone
 
         self.i_value = self.integrator * self.kI
 
@@ -41,7 +42,7 @@ class Pid(object):
         Initilize the setpoint of PID
         """
         self.set_point = set_point
-        self.last_integrator=0
+        self.integrator=0
         self.last_derivator=0
 
     def setkP(self,P):
