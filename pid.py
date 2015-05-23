@@ -34,8 +34,10 @@ class Pid(object):
                 self.integrator = -self.izone
 
         self.i_value = self.integrator * self.kI
+        
+        self.f_value = self.set_point * self.kF
 
-        correction = self.p_value + self.i_value + self.d_value
+        correction = self.p_value + self.i_value + self.d_value + self.f_value
 
         self.output.set(correction)
     

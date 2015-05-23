@@ -50,7 +50,7 @@ class TestPid(unittest.TestCase):
         self.assertEqual(output.correction, 0)
         
         #test ki is working
-        p = Pid(output, 0.0, 1.0)
+        p = Pid(output, 0.0, kI = 1.0)
         p.update(0)
         self.assertEqual(output.correction, 0)
         p.update(100)
@@ -60,7 +60,7 @@ class TestPid(unittest.TestCase):
         self.assertEqual(output.correction, 0)
         
         #test izone
-        p = Pid(output, 0.0, 1.0, izone=100)
+        p = Pid(output, 0.0, kI = 1.0, izone=100)
         p.update(0)
         self.assertEqual(output.correction, 0)
         p.update(100)
@@ -77,7 +77,7 @@ class TestPid(unittest.TestCase):
         self.assertEqual(output.correction, 0)
         
         #test kd is working
-        p = Pid(output, 0.0, 0.0, 1.0)
+        p = Pid(output, 0.0, kD = 1.0)
         p.update(0)
         self.assertEqual(output.correction, 0)
         p.update(100)
@@ -87,3 +87,14 @@ class TestPid(unittest.TestCase):
         p.update(0)
         self.assertEqual(output.correction, 0)
         
+        #test kf is working
+        p = Pid(output, 0.0, kF = 1.0)
+        p.setPoint(0)
+        p.update(0)
+        self.assertEqual(output.correction, 0)
+        p.setPoint(100)
+        p.update(0)
+        self.assertEqual(output.correction, 100)
+        p.setPoint(0)
+        p.update(0)
+        self.assertEqual(output.correction, 0)
