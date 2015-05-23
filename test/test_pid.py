@@ -3,6 +3,10 @@
 import unittest
 from pid import Pid, PidOutput
 
+class PidOutputTest(PidOutput):
+    def set(self, value):
+        self.correction = value
+
 class TestPid(unittest.TestCase):
 
     def test_init_pidoutput(self):
@@ -12,7 +16,7 @@ class TestPid(unittest.TestCase):
 
     def test_init_constants(self):
         """Check that the PID constants are set properly."""
-        output = PidOutput()
+        output = PidOutputTest()
         p = Pid(output, 1.0)
         self.assertEqual(p.kP, 1.0)
         self.assertEqual(p.kI, 0.0)
@@ -28,7 +32,7 @@ class TestPid(unittest.TestCase):
     
     def test_pid_update(self):
         #baseline test
-        output = PidOutput()
+        output = PidOutputTest()
         p = Pid(output, 0.0)
         p.setPoint(0.0)
         p.update(0)

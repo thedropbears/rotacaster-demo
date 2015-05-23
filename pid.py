@@ -1,3 +1,5 @@
+from abc import ABCMeta, abstractmethod
+
 class Pid(object):
     """Class to run a PID control loop."""
     def __init__(self, pid_output, kP, kI=0.0, kD=0.0, kF=0.0, set_point=0.0, izone=None):
@@ -35,7 +37,7 @@ class Pid(object):
 
         correction = self.p_value + self.i_value + self.d_value
 
-        self.output.correction = correction
+        self.output.set(correction)
     
     def setPoint(self,set_point):
         """
@@ -60,5 +62,10 @@ class Pid(object):
     def getError(self):
         return self.error
 
-class PidOutput(object):
+class PidOutput:
     """Class that Pid objects output to."""
+    __metaclass__ = ABCMeta
+    
+    @abstractmethod
+    def set(self, value):
+        self.correction = value
