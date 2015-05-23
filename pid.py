@@ -7,8 +7,6 @@ class Pid(object):
         self.kF=kF
         if not(isinstance(pid_output, PidOutput)):
             raise Exception("Must pass in a PidOutput object")
-        return kP
-
 
 class PidOutput(object):
     """Class that Pid objects output to."""
