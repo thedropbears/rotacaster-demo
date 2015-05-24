@@ -16,3 +16,6 @@ class TestMpu(unittest.TestCase):
         s.sendto("0,1,2,3,4,5,6,7,8,9,10,11,12", ("127.0.0.1", MPU_PORT))
         
         assertEqual(mpu.getEuler(), [0, 1, 2])
+        assertEqual(mpu.getGyro(), [3, 4, 5])
+        assertEqual(mpu.getAccel(), [6, 7, 8])
+        assertEqual(mpu.getQuat(), [9, 10, 11, 12])
