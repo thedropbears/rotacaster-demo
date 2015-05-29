@@ -27,14 +27,19 @@ class Qep(object):
         if mode == Qep.MODE_RELATIVE and period <= 0:
             raise Exception("Must pass in a valid counting period greater than zero in relative mode")
         self.mode = mode
-        self.write((self.qep_dir+self.MODE), str(self.mode))
+        self.write((self.qep_dir+Qep.MODE), str(self.mode))
         self.cpr = cpr
         self.period = period
         # Write the period to a file
         if self.mode == Qep.MODE_RELATIVE:
-            self.write((self.qep_dir+self.PERIOD), str(self.period))
+            self.write((self.qep_dir+Qep.PERIOD), str(self.period))
         self.position = position
-        self.write((self.qep_dir+self.POSITION), str(self.position))
+        self.write((self.qep_dir+Qep.POSITION), str(self.position))
+        
+    def getRevolutions(self):
+        if self.mode == Qep.MODE_RELATIVE:
+            raise Exception("Must not ask for revolutions while encoder is in relative mode")
+        return (float(open(self.qep_dir+Qep.POSITION).read())/4.0/self.cpr)
             
     def write(self, path, data):
         """Overwrites or creates file at path and writes data to it"""

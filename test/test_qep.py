@@ -59,13 +59,13 @@ class QepTest(unittest.TestCase):
         q = Qep("QEP99")
         
         # Test that we are quad counting and scaling the values correctly
-        set_qep_count(360)
+        self.set_qep_count(360)
         self.assertEqual(0.5, q.getRevolutions())
-        set_qep_count(720)
+        self.set_qep_count(720)
         self.assertEqual(1.0, q.getRevolutions())
         
         # Test non default values
         q = Qep("QEP99", cpr = 100, position = 200)
         self.assertEqual(0.5, q.getRevolutions())
-        set_qep_count(400)
+        self.set_qep_count(400)
         self.assertEqual(1.0, q.getRevolutions())
