@@ -54,5 +54,18 @@ class QepTest(unittest.TestCase):
         # Ensure that we are setting the position
         self.assertEqual(720, float(open(self.QEP99_dir+Qep.POSITION).read()))
         
-    def test_qep_file_output(self):
-        pass
+    def test_qep_output(self):
+        # Absolute Mode Tests
+        q = Qep("QEP99")
+        
+        # Test that we are quad counting and scaling the values correctly
+        set_qep_count(360)
+        self.assertEqual(0.5, q.getRevolutions())
+        set_qep_count(720)
+        self.assertEqual(1.0, q.getRevolutions())
+        
+        # Test non default values
+        q = Qep("QEP99", cpr = 100, position = 200)
+        self.assertEqual(0.5, q.getRevolutions())
+        set_qep_count(400)
+        self.assertEqual(1.0, q.getRevolutions())
