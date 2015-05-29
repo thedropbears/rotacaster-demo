@@ -10,12 +10,12 @@ class QepTest(unittest.TestCase):
     def setUp(self):
         tmpdir = tempfile.mkdtemp()
         # Create a temporary node tree
-        self.QEP99 = "/sys/devices/ocp.2/48306000.epwmss/48306180.eqep"
-        self.QEP99_dir = tmpdir + self.QEP99
+        self.QEP99 = tmpdir + "/sys/devices/ocp.2/48306000.epwmss/48306180.eqep"
+        self.QEP99_dir = self.QEP99
         Qep.PORTS["QEP99"] = self.QEP99
         if not os.path.exists(self.QEP99_dir):
             os.makedirs(self.QEP99_dir)
-    
+        
     def set_qep_count(self, position):
         # Open the mode attribute file
         position_file = open(self.QEP99 + Qep.POSITION, "w")

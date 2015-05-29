@@ -22,18 +22,19 @@ class Qep(object):
         if not qep_id in Qep.PORTS.keys():
             raise Exception("Must pass in a recognised BBB QEP port: " + str(Qep.PORTS.keys()))
         self.qep_id = qep_id
-        #self.qep_dir = glob.glob(Qep.PORTS[qep_id])
-        self.qep_dir = Qep.PORTS[qep_id]
+        self.qep_dir = glob.glob(Qep.PORTS[qep_id])[0]
+        #self.qep_dir = Qep.PORTS[qep_id]
         if mode == Qep.MODE_RELATIVE and period <= 0:
             raise Exception("Must pass in a valid counting period greater than zero in relative mode")
         self.mode = mode
+        self.write((self.qep_dir+self.MODE), str(self.mode))
         self.cpr = cpr
         self.period = period
         # Write the period to a file
         if self.mode == Qep.MODE_RELATIVE:
-            self.write(self.qep_dir+self.PERIOD, self.period)
-        self.position = 0
-        self.write(self.qep_dir+self.POSITION, self.position)
+            self.write((self.qep_dir+self.PERIOD), str(self.period))
+        self.position = position
+        self.write((self.qep_dir+self.POSITION), str(self.position))
             
     def write(self, path, data):
         """Overwrites or creates file at path and writes data to it"""
