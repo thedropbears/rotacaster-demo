@@ -69,3 +69,23 @@ class QepTest(unittest.TestCase):
         self.assertEqual(0.5, q.getRevolutions())
         self.set_qep_count(400)
         self.assertEqual(1.0, q.getRevolutions())
+        
+        # Relative/Velocity mode tests
+        q = Qep("QEP99", Qep.MODE_RELATIVE)
+        
+        # Test that we get the correct speed; default value is 100 overflows per second
+        self.set_qep_count(1.0)
+        self.assertEqual(100.0, q.getSpeed()) # represents revolutions per second
+        self.assertEqual(1.0, q.getRawSpeed()) # represents revolutions per period
+        self.set_qep_count(0.5)
+        self.assertEqual(50.0, q.getSpeed()) # represents revolutions per second
+        self.assertEqual(0.5, q.getRawSpeed()) # represents revolutions per period
+        
+        # Test non-default values
+        q = Qep("QEP99", Qep.MODE_RELATIVE, period = 20000000)
+        self.set_qep_count(1.0)
+        self.assertEqual(50.0, q.getSpeed())
+        self.assertEqual(1.0, q.getRawSpeed())
+        self.set_qep_count(0.5)
+        self.assertEqual(25.0, q.getSpeed())
+        self.assertEqual(0.5, q.getRawSpeed())

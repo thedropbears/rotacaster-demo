@@ -18,7 +18,7 @@ class Qep(object):
     MODE_ABSOLUTE = 0
     MODE_RELATIVE = 1
     
-    def __init__(self, qep_id, mode = MODE_ABSOLUTE, cpr = 180, period = 100000000, position = 0):
+    def __init__(self, qep_id, mode = MODE_ABSOLUTE, cpr = 180, period = 10000000, position = 0):
         if not qep_id in Qep.PORTS.keys():
             raise Exception("Must pass in a recognised BBB QEP port: " + str(Qep.PORTS.keys()))
         self.qep_id = qep_id
@@ -30,6 +30,7 @@ class Qep(object):
         self.write((self.qep_dir+Qep.MODE), str(self.mode))
         self.cpr = cpr
         self.period = period
+        self.period_in_seconds = self.period / 1000000000.0
         # Write the period to a file
         if self.mode == Qep.MODE_RELATIVE:
             self.write((self.qep_dir+Qep.PERIOD), str(self.period))
@@ -37,10 +38,23 @@ class Qep(object):
         self.write((self.qep_dir+Qep.POSITION), str(self.position))
         
     def getRevolutions(self):
+        """Return the number of revolutions between here and the zero point as a float, with 1.0 being 1 revolution"""
         if self.mode == Qep.MODE_RELATIVE:
-            raise Exception("Must not ask for revolutions while encoder is in relative mode")
+            raise Exception("Number of absolute revolutions is unavailable in velocity mode. Try Qep.getSpeed() instead")
         return (float(open(self.qep_dir+Qep.POSITION).read())/4.0/self.cpr)
-            
+    
+    def getSpeed(self):
+        """Return the speed of the encoder in relative mode in revolutions per second"""
+        if self.mode == Qep.MODE_ABSOLUTE:
+            raise Exception("Speed of wheel is unavailable in absolute mode. Try Qep.getRevolutions() instead")
+        return (float(open(self.qep_dir+Qep.POSITION).read())/self.period_in_seconds)
+    
+    def getRawSpeed(self):
+        """Return the speed of the encoder in relative mode in revolutions per period"""
+        if self.mode == Qep.MODE_ABSOLUTE:
+            raise Exception("Speed of wheel is unavailable in absolute mode. Try Qep.getRevolutions() instead")
+        return (float(open(self.qep_dir+Qep.POSITION).read()))
+    
     def write(self, path, data):
         """Overwrites or creates file at path and writes data to it"""
         f = open(path, "w")
