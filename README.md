@@ -1,2 +1,4 @@
 # rotacaster-demo
-The Drop Bears' update of Holly's (their 2013) robot to the 2015 control system for a demonstration for Rotacaster (http://www.rotacaster.com.au/)
+Code to run the Drop Bears' demo bot for rotacaster (http://www.rotacaster.com.au/). Written in Python using TTD and structure very loosely based on the WPILib library. 
+
+To run the tests, you need nosetests installed (pip install nosetests).
