@@ -16,9 +16,9 @@ class RobotTest(unittest.TestCase):
         # set up a temporary directory tree to satisfy the Pwm members of robot
         tmpdir = tempfile.mkdtemp()
         # Create a temporary node tree
-        self.MOTOR_A_DIR = tmpdir + Robot.MOTOR_A_ID + ".0"
-        self.MOTOR_B_DIR = tmpdir + Robot.MOTOR_B_ID + ".1"
-        self.MOTOR_C_DIR = tmpdir + Robot.MOTOR_C_ID + ".2"
+        self.MOTOR_A_DIR = tmpdir + Pwm.PORTS[Robot.MOTOR_A_ID] + ".0"
+        self.MOTOR_B_DIR = tmpdir + Pwm.PORTS[Robot.MOTOR_B_ID] + ".1"
+        self.MOTOR_C_DIR = tmpdir + Pwm.PORTS[Robot.MOTOR_C_ID] + ".2"
         if not os.path.exists(self.MOTOR_A_DIR):
             os.makedirs(self.MOTOR_A_DIR)
         if not os.path.exists(self.MOTOR_B_DIR):
