@@ -3,6 +3,7 @@
 from pid import Pid
 from pid import PidOutput
 from pwm import Pwm
+from mpu import Mpu
 
 class Robot(object):
     
@@ -31,6 +32,7 @@ class Robot(object):
         self.motor_a = Pwm(Robot.MOTOR_A_ID)
         self.motor_b = Pwm(Robot.MOTOR_B_ID)
         self.motor_c = Pwm(Robot.MOTOR_C_ID)
+        self.mpu = Mpu()
         self.current_command = Robot.INIT_COMMAND
 
 class VelocityPidOutput(PidOutput):
