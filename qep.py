@@ -2,9 +2,9 @@ import glob
 
 class Qep(object):
     PORTS = {
-        "QEP1" : "/sys/devices/ocp.2/48300000.epwmss/48300180.eqep",
-        "QEP2" : "/sys/devices/ocp.2/48302000.epwmss/48302180.eqep",
-        "QEP3" : "/sys/devices/ocp.2/48304000.epwmss/48304180.eqep" }
+        "QEP0" : "/sys/devices/ocp.2/48300000.epwmss/48300180.eqep",
+        "QEP1" : "/sys/devices/ocp.2/48302000.epwmss/48302180.eqep",
+        "QEP2" : "/sys/devices/ocp.2/48304000.epwmss/48304180.eqep" }
     
     # The counting mode of the encoder, 0=absolute, 1=relative
     MODE = "/mode"

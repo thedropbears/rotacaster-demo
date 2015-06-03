@@ -12,7 +12,7 @@ import tempfile, os
 class MotorControllerTest(unittest.TestCase):
     
     def setUp(self):
-        """Create a temporary node tree to satisfy the Pwm class in motorcontroller"""
+        """Create a temporary node tree to satisfy the Pwm and Qep classes in motorcontroller"""
         tmpdir = tempfile.mkdtemp()
         # Create a temporary node tree
         self.PWM99A = tmpdir + "/sys/devices/ocp.3/pwm_test_P9_99"
@@ -20,9 +20,23 @@ class MotorControllerTest(unittest.TestCase):
         Pwm.PORTS["PWM99A"] = self.PWM99A
         if not os.path.exists(self.PWM99A_dir):
             os.makedirs(self.PWM99A_dir)
+        self.QEP99 = tmpdir + "/sys/devices/ocp.2/48306000.epwmss/48306180.eqep"
+        self.QEP99_dir = self.QEP99
+        Qep.PORTS["QEP99"] = self.QEP99
+        if not os.path.exists(self.QEP99_dir):
+            os.makedirs(self.QEP99_dir)
     
     def test_motor_controller_init(self):
-        m = MotorController(MotorController.MOTOR_CONTROLLER_VALUES["VICTOR_SP"], Robot.MOTOR_A_ID, Qep.PORTS["QEP1"])
+        p = Pwm("PWM99A", MotorController.MOTOR_CONTROLLER_VALUES["VICTOR_SP"]["min_duty"],
+                MotorController.MOTOR_CONTROLLER_VALUES["VICTOR_SP"]["max_duty"],
+                MotorController.MOTOR_CONTROLLER_VALUES["VICTOR_SP"]["period"])
+        
+        pid_output = VelocityPidOutput()
+        p_controller = Pid(pid_output, 1.0, 0.0, 0.0, 1.0, set_point = 0.0)
+        
+        q = Qep("QEP99", Qep.MODE_RELATIVE, 360, 10000000, 0.0)
+        
+        m = MotorController(p, p_controller, q)
         
         self.assertTrue(isinstance(m, Thread))
         self.assertTrue(isinstance(m.pwm, Pwm))
@@ -31,13 +45,6 @@ class MotorControllerTest(unittest.TestCase):
         self.assertTrue(isinstance(m.pid_output, VelocityPidOutput))
         
         # Test default values
-        self.assertEqual(m.pid_enabled, False)
-        
-        # Test non defualt falues
-        m = MotorController(MotorController.MOTOR_CONTROLLER_VALUES["VICTOR_SP"], Robot.MOTOR_A_ID, Qep.PORTS["QEP1"], True, P = 1.0, I = 0.0, D = 0.0, F = 1.0)
-        
         self.assertEqual(m.pid_enabled, True)
-        self.assertEqual(m.P, 1.0)
-        self.assertEqual(m.I, 0.0)
-        self.assertEqual(m.D, 0.0)
-        self.assertEqual(m.F, 1.0)
+        
+        # Test non defualt values

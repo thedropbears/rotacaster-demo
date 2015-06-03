@@ -56,7 +56,13 @@ class Pid(object):
         self.kI=I
 
     def setKd(self,D):
-        self.Kd=D
+        self.kD = D
+    
+    def setKf(self, F):
+        self.kD =F
+    
+    def getOutput(self):
+        return self.output
 
     def getPoint(self):
         return self.set_point
