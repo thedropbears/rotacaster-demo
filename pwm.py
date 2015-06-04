@@ -32,8 +32,10 @@ class Pwm(object):
         self.pwm_on()
         
     def set_speed(self, speed):
-        if not -1 <= speed <= 1:
-            raise Exception("Speed must be passed as a float between -1 and 1")
+        if speed >= 1.0:
+            speed = 1.0
+        if speed <= -1.0:
+            speed = -1.0
         # convert speed from float from 0 to 1 into a time in ns
         duty_in_ns = ((speed+1.0)/2.0) * (self.max_duty - self.min_duty) + self.min_duty
         self.write(self.pwm_dir + Pwm.DUTY, str(duty_in_ns))

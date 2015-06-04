@@ -8,6 +8,7 @@ from pwm import Pwm
 from pid import Pid
 from threading import Thread
 import tempfile, os
+import time
 
 class MotorControllerTest(unittest.TestCase):
     
@@ -34,7 +35,7 @@ class MotorControllerTest(unittest.TestCase):
         pid_output = VelocityPidOutput()
         p_controller = Pid(pid_output, 1.0, 0.0, 0.0, 1.0, set_point = 0.0)
         
-        q = Qep("QEP99", Qep.MODE_RELATIVE, 360, 10000000, 0.0)
+        q = Qep("QEP99", Qep.MODE_ABSOLUTE, 360, 10000000, 0.0)
         
         m = MotorController(p, p_controller, q)
         
@@ -43,8 +44,22 @@ class MotorControllerTest(unittest.TestCase):
         self.assertTrue(isinstance(m.qep, Qep))
         self.assertTrue(isinstance(m.pid, Pid))
         self.assertTrue(isinstance(m.pid_output, VelocityPidOutput))
-        
+
         # Test default values
         self.assertEqual(m.pid_enabled, True)
         
-        # Test non defualt values
+    def test_motor_controlling(self):
+        
+        p = Pwm("PWM99A", MotorController.MOTOR_CONTROLLER_VALUES["VICTOR_SP"]["min_duty"],
+                MotorController.MOTOR_CONTROLLER_VALUES["VICTOR_SP"]["max_duty"],
+                MotorController.MOTOR_CONTROLLER_VALUES["VICTOR_SP"]["period"])
+        
+        pid_output = VelocityPidOutput()
+        p_controller = Pid(pid_output, 1.0, 0.0, 0.0, 1.0, set_point = 0.0)
+        
+        q = Qep("QEP99", Qep.MODE_ABSOLUTE, 360, 10000000, 0.0)
+        
+        m = MotorController(p, p_controller, q)
+        
+        while True:
+            x = 1
