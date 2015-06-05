@@ -14,12 +14,11 @@ class MotorController(threading.Thread):
     
     def __init__(self, pwm, pid, qep, pid_enabled = True):
         super(MotorController, self).__init__()
-        if qep.mode == qep.MODE_RELATIVE:
+        if qep.mode == Qep.MODE_RELATIVE:
             raise Exception("Must pas in a Qep object in absolute mode")
         self.pwm = pwm
         self.pid = pid
         self.qep = qep
-        self.pid_output = self.pid.getOutput()
         self.pid_enabled = pid_enabled
         self.speed = 0
         if self.pid_enabled and self.pid.kF == 0:
