@@ -33,6 +33,10 @@ class Robot(object):
     ROBOT_MAX_X_SPEED = math.sin(math.radians(60)) # approx 0.87 (root 2 over 3)
     ROBOT_MAX_Y_SPEED = math.cos(math.radians(60)) #  0.50
     
+    # the speed of rotation at which we shut down the pid so it does not oscillate
+    # as you set the set point while still rotating
+    YAW_MOMENTUM_THRESHOLD = math.radians(10.0) # degrees per second
+    
     def __init__(self):
         # Velocity PID object setup
         self.vel_pid_output_a = VelocityPidOutput()
@@ -60,9 +64,13 @@ class Robot(object):
         self.mpu = Mpu()
         self.current_command = Robot.INIT_COMMAND
         
+        # pid *enabled* by default
         self.yaw_pid_enabled = True
+        # pid not in *control* by default, this is automatically set by drive
+        self.pid_in_control = False
     
     def drive(self, vX, vY, vZ, throttle):
+        vPID = 0.0
         
         # Drive equations that translate vX, vY and vZ into commands to be sent to the motors
         # front motor
@@ -74,17 +82,50 @@ class Robot(object):
         
         motor_input = [mA, mB, mC]
         
+        if self.yaw_pid_enabled:
+            if not vZ == 0:
+                # spinning under command -> no PID
+                self.pid_in_control = False
+            elif math.fabs(self.mpu.get_gyro()[2]) < Robot.YAW_MOMENTUM_THRESHOLD:
+                # momentum is less than the threshold and we are not under command
+                # -> PID can now take control
+                self.pid_in_control = True
+            
+            if self.pid_in_control:
+                vPID = self.yaw_pid_output.value
+            else:
+                heading = self.mpu.get_euler()[0] # yaw
+                self.yaw_pid.set_set_point(heading)
+                # zero the correction value so that the next time the code runs the existing
+                # correction value will not still be there
+                self.yaw_pid_output.value = 0.0
+        
         max = 1.0
+        # find the maximum motor speed
         for i in range(3):
             if math.fabs(motor_input[i]) > max:
                 max = abs(motor_input[i])
         
+        # scale between -1 and 1
         for i in range(3):
-            motor_input[i] = motor_input[i]/max
+            motor_input[i] /= max
         
+        # multiply by throttle
         for i in range(3):
             motor_input[i] *= throttle
         
+        if self.yaw_pid_enabled:
+            max = 1
+            
+            for i in range(3):
+                motor_input[i] -= vPID
+                if math.fabs(motor_input[i]) > max:
+                    max = math.fabs(motor_input[i])
+            
+            for i in range(3):
+                motor_input[i] /= max
+        
+        # set the speeds of the motors
         for i in range(3):
             self.motors[i].set_speed(motor_input[i])
 
