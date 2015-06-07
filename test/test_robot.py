@@ -59,3 +59,16 @@ class RobotTest(unittest.TestCase):
         self.assertTrue(isinstance(r.motor_b, MotorController))
         self.assertTrue(isinstance(r.motor_c, MotorController))
         self.assertEqual(r.current_command, Robot.INIT_COMMAND)
+        
+    def test_robot_drive(self):
+        
+        r = Robot()
+        r.yaw_pid_enabled = False # turn off PID so we dont have it messing with the tests
+        
+        r.drive(0.0, 0.0, 0.0, 0.0)
+        
+        self.assertEqual(r.motors[0].pid.get_set_point(), 0.0)
+        
+        r.drive(0.0, 1.0, 0.0, 1.0)
+        
+        self.assertAlmostEqual(r.motors[0].pid.get_set_point(), 0.5)

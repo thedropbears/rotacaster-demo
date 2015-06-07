@@ -1,5 +1,6 @@
 """Main robot class"""
 
+import math
 from pid import Pid, PidOutput
 from pwm import Pwm
 from qep import Qep
@@ -29,6 +30,9 @@ class Robot(object):
     
     VEL_PID_ENABLED = True
     
+    ROBOT_MAX_X_SPEED = math.sin(math.radians(60)) # approx 0.87 (root 2 over 3)
+    ROBOT_MAX_Y_SPEED = math.cos(math.radians(60)) #  0.50
+    
     def __init__(self):
         # Velocity PID object setup
         self.vel_pid_output_a = VelocityPidOutput()
@@ -57,6 +61,32 @@ class Robot(object):
         self.current_command = Robot.INIT_COMMAND
         
         self.yaw_pid_enabled = True
+    
+    def drive(self, vX, vY, vZ, throttle):
+        
+        # Drive equations that translate vX, vY and vZ into commands to be sent to the motors
+        # front motor
+        mA = ((0.0*vX) + (vY * Robot.ROBOT_MAX_Y_SPEED) + vZ)
+        # bottom left motor
+        mB = ((-vX * Robot.ROBOT_MAX_Y_SPEED /  Robot.ROBOT_MAX_X_SPEED) + (-vY * 1.0) + vZ)
+        # bottom right motor
+        mC = ((vX * Robot.ROBOT_MAX_Y_SPEED /  Robot.ROBOT_MAX_X_SPEED) + (-vY * 1.0) + vZ)
+        
+        motor_input = [mA, mB, mC]
+        
+        max = 1.0
+        for i in range(3):
+            if math.fabs(motor_input[i]) > max:
+                max = abs(motor_input[i])
+        
+        for i in range(3):
+            motor_input[i] = motor_input[i]/max
+        
+        for i in range(3):
+            motor_input[i] *= throttle
+        
+        for i in range(3):
+            self.motors[i].set_speed(motor_input[i])
 
 class VelocityPidOutput(PidOutput):
     value = 0.0
