@@ -76,4 +76,4 @@ class PidOutput:
     
     @abstractmethod
     def set(self, value):
-        self.correction = value
+        self.value = value

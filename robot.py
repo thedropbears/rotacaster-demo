@@ -1,46 +1,69 @@
 """Main robot class"""
 
-from pid import Pid
-from pid import PidOutput
+from pid import Pid, PidOutput
 from pwm import Pwm
+from qep import Qep
 from mpu import Mpu
+from motor_controller import MotorController
 
 class Robot(object):
     
     VEL_P = 0
     VEL_I = 0
     VEL_D = 0
-    VEL_F = 0
+    VEL_F = 1.0
     
     YAW_P = 0
     YAW_I = 0
     YAW_D = 0
     
-    MOTOR_A_ID = "PWM1A-14"
-    MOTOR_B_ID = "PWM1A-36"
-    MOTOR_C_ID = "PWM1B-16"
+    # Pwm and Qep ids for motor controllers a, b and c
+    MOTOR_A_PWM = "PWM1A-14"
+    MOTOR_A_QEP = "QEP0"
+    MOTOR_B_PWM = "PWM1A-36"
+    MOTOR_B_QEP = "QEP1"
+    MOTOR_C_PWM = "PWM1B-16"
+    MOTOR_C_QEP = "QEP2"
     
     INIT_COMMAND = "OmniDrive" # placeholder
     
+    VEL_PID_ENABLED = True
+    
     def __init__(self):
-        self.vel_pid_on = True
-        self.vel_pid_output = VelocityPidOutput()
-        self.vel_pid = Pid(self.vel_pid_output, Robot.VEL_P, Robot.VEL_I, Robot.VEL_D)
-        self.yaw_pid_on = True
+        # Velocity PID object setup
+        self.vel_pid_output_a = VelocityPidOutput()
+        self.vel_pid_output_b = VelocityPidOutput()
+        self.vel_pid_output_c = VelocityPidOutput()
+        self.vel_pid_a = Pid(self.vel_pid_output_a, Robot.VEL_P, Robot.VEL_I, Robot.VEL_D, Robot.VEL_F)
+        self.vel_pid_b = Pid(self.vel_pid_output_b, Robot.VEL_P, Robot.VEL_I, Robot.VEL_D, Robot.VEL_F)
+        self.vel_pid_c = Pid(self.vel_pid_output_c, Robot.VEL_P, Robot.VEL_I, Robot.VEL_D, Robot.VEL_F)
+        # Qep encoder object setup
+        self.qep_a = Qep(Robot.MOTOR_A_QEP)
+        self.qep_b = Qep(Robot.MOTOR_B_QEP)
+        self.qep_c = Qep(Robot.MOTOR_C_QEP)
+        # Pwm object setup
+        self.pwm_a = Pwm(Robot.MOTOR_A_ID)
+        self.pwm_b = Pwm(Robot.MOTOR_B_ID)
+        self.pwm_c = Pwm(Robot.MOTOR_C_ID)
+        # Create MotorController objects
+        self.motor_a = MotorController(self.pwm_a, self.vel_pid_a, self.pid_output_a, self.qep_a, self.VEL_PID_ENABLED)
+        self.motor_b = MotorController(self.pwm_b, self.vel_pid_b, self.pid_output_b, self.qep_b, self.VEL_PID_ENABLED)
+        self.motor_c = MotorController(self.pwm_c, self.vel_pid_c, self.pid_output_c, self.qep_c, self.VEL_PID_ENABLED)
+        self.motors = [motor_a, motor_b, motor_c]
+        
         self.yaw_pid_output = YawPidOutput()
         self.yaw_pid = Pid(self.yaw_pid_output, Robot.YAW_P, Robot.YAW_I, Robot.YAW_D)
-        self.motor_a = Pwm(Robot.MOTOR_A_ID)
-        self.motor_b = Pwm(Robot.MOTOR_B_ID)
-        self.motor_c = Pwm(Robot.MOTOR_C_ID)
         self.mpu = Mpu()
         self.current_command = Robot.INIT_COMMAND
+        
+        self.yaw_pid_enabled = False
 
 class VelocityPidOutput(PidOutput):
-    correction = 0
+    value = 0.0
     def set(self, value):
-        self.correction = value
+        self.value = value
         
 class YawPidOutput(PidOutput):
-    correction = 0
+    value = 0.0
     def set(self, value):
-        self.correction = value
+        self.value = value
