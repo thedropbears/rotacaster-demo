@@ -30,19 +30,24 @@ class MotorController(threading.Thread):
     
     def run(self):
         while self.running.isSet():
-            # Get the number of revolutions relative to the start point 
-            self.qep_position = self.qep.get_revolutions()
-            change_since_last = self.qep_position - self.last_qep # the change since the last iteration
-            self.last_qep = self.qep_position
-            self.pid.update(change_since_last)
-            self.speed_after_pid = self.pid_output.value
-            self.pwm.set_speed(self.speed_after_pid)
+            if self.pid_enabled:
+                # Get the number of revolutions relative to the start point 
+                self.qep_position = self.qep.get_revolutions()
+                change_since_last = self.qep_position - self.last_qep # the change since the last iteration
+                self.last_qep = self.qep_position
+                self.pid.update(change_since_last)
+                self.speed_to_command = self.pid_output.value
+            else:
+                self.speed_to_command = self.speed
+            self.pwm.set_speed(self.speed_to_command)
             time.sleep(0.02 - (time.time() - self.last_time))
             self.last_time = time.time()
     
     def set_speed(self, speed):
         assert(-1.0 <= speed <= 1.0, "Must pass in a speed in range -1 to 1")
-        self.pid.set_set_point(speed)
+        if self.pid_enabled:
+            self.pid.set_set_point(speed)
+        self.speed = speed
     
 class VelocityPidOutput(PidOutput):
     correction = 0

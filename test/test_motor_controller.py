@@ -42,6 +42,7 @@ class MotorControllerTest(unittest.TestCase):
         q = MockQep()
         
         self.m = MotorController(p, p_controller, self.p_output, q)
+        self.m_pid_disabled = MotorController(p, p_controller, self.p_output, q, False)
         pass
     
     def test_motor_controller_init(self):
@@ -60,6 +61,12 @@ class MotorControllerTest(unittest.TestCase):
         
         self.assertEqual(1.0, self.m.pid.set_point)
         
-        time.sleep(0.2)
+        time.sleep(0.1)
         
         self.assertEqual(self.p_output.value, 1.0)
+        
+        self.m_pid_disabled.set_speed(1.0)
+        
+        time.sleep(0.1)
+        
+        self.assertEqual(1.0, self.m_pid_disabled.speed_to_command)
