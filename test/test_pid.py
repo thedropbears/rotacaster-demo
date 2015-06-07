@@ -34,7 +34,7 @@ class TestPid(unittest.TestCase):
         #baseline test
         output = PidOutputTest()
         p = Pid(output, 0.0)
-        p.setPoint(0.0)
+        p.set_set_point(0.0)
         p.update(0)
         self.assertEqual(output.correction, 0)
         p.update(100)
@@ -89,12 +89,12 @@ class TestPid(unittest.TestCase):
         
         #test kf is working
         p = Pid(output, 0.0, kF = 1.0)
-        p.setPoint(0)
+        p.set_set_point(0)
         p.update(0)
         self.assertEqual(output.correction, 0)
-        p.setPoint(100)
+        p.set_set_point(100)
         p.update(0)
         self.assertEqual(output.correction, 100)
-        p.setPoint(0)
+        p.set_set_point(0)
         p.update(0)
         self.assertEqual(output.correction, 0)

@@ -20,9 +20,9 @@ class TestMpu(unittest.TestCase):
         
         time.sleep(1)
         
-        self.assertEqual(mpu.getEuler(), [0, 1, 2])
-        self.assertEqual(mpu.getGyro(), [3, 4, 5])
-        self.assertEqual(mpu.getAccel(), [6, 7, 8])
-        self.assertEqual(mpu.getQuat(), [9, 10, 11, 12])
+        self.assertEqual(mpu.get_euler(), [0, 1, 2])
+        self.assertEqual(mpu.get_gyro(), [3, 4, 5])
+        self.assertEqual(mpu.get_accel(), [6, 7, 8])
+        self.assertEqual(mpu.get_quat(), [9, 10, 11, 12])
         
         mpu.stop_monitoring()

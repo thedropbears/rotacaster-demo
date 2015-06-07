@@ -43,14 +43,14 @@ class Mpu(threading.Thread):
         self.sock = socket(AF_INET, SOCK_DGRAM)
         self.sock.bind(('', MPU_PORT)) # bind to all interfaces/addresses by default
     
-    def getEuler(self):
+    def get_euler(self):
         return self.euler
     
-    def getGyro(self):
+    def get_gyro(self):
         return self.gyro
     
-    def getAccel(self):
+    def get_accel(self):
         return self.accel
     
-    def getQuat(self):
+    def get_quat(self):
         return self.quat

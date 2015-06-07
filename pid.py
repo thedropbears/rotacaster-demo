@@ -41,7 +41,7 @@ class Pid(object):
 
         self.output.set(correction)
     
-    def setPoint(self,set_point):
+    def set_set_point(self,set_point):
         """
         Initilize the setpoint of PID
         """
@@ -49,25 +49,25 @@ class Pid(object):
         self.integrator=0
         self.last_derivator=0
 
-    def setkP(self,P):
+    def set_kP(self,P):
         self.kP=P
 
-    def setkI(self,I):
+    def set_kI(self,I):
         self.kI=I
 
-    def setKd(self,D):
+    def set_kD(self,D):
         self.kD = D
     
-    def setKf(self, F):
+    def set_kF(self, F):
         self.kD =F
     
-    def getOutput(self):
+    def get_output(self):
         return self.output
 
-    def getPoint(self):
+    def get_set_point(self):
         return self.set_point
 
-    def getError(self):
+    def get_error(self):
         return self.error
 
 class PidOutput:

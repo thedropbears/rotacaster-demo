@@ -37,19 +37,19 @@ class Qep(object):
         self.position = position
         self.write((self.qep_dir+Qep.POSITION), str(self.position))
         
-    def getRevolutions(self):
+    def get_revolutions(self):
         """Return the number of revolutions between here and the zero point as a float, with 1.0 being 1 revolution"""
         if self.mode == Qep.MODE_RELATIVE:
             raise Exception("Number of absolute revolutions is unavailable in velocity mode. Try Qep.getSpeed() instead")
         return (float(open(self.qep_dir+Qep.POSITION).read())/4.0/self.cpr)
     
-    def getSpeed(self):
+    def get_speed(self):
         """Return the speed of the encoder in relative mode in revolutions per second"""
         if self.mode == Qep.MODE_ABSOLUTE:
             raise Exception("Speed of wheel is unavailable in absolute mode. Try Qep.getRevolutions() instead")
         return (float(open(self.qep_dir+Qep.POSITION).read())/self.period_in_seconds)
     
-    def getRawSpeed(self):
+    def get_raw_speed(self):
         """Return the speed of the encoder in relative mode in revolutions per period"""
         if self.mode == Qep.MODE_ABSOLUTE:
             raise Exception("Speed of wheel is unavailable in absolute mode. Try Qep.getRevolutions() instead")

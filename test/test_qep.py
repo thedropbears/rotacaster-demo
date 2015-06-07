@@ -60,32 +60,32 @@ class QepTest(unittest.TestCase):
         
         # Test that we are quad counting and scaling the values correctly
         self.set_qep_count(360)
-        self.assertEqual(0.5, q.getRevolutions())
+        self.assertEqual(0.5, q.get_revolutions())
         self.set_qep_count(720)
-        self.assertEqual(1.0, q.getRevolutions())
+        self.assertEqual(1.0, q.get_revolutions())
         
         # Test non default values
         q = Qep("QEP99", cpr = 100, position = 200)
-        self.assertEqual(0.5, q.getRevolutions())
+        self.assertEqual(0.5, q.get_revolutions())
         self.set_qep_count(400)
-        self.assertEqual(1.0, q.getRevolutions())
+        self.assertEqual(1.0, q.get_revolutions())
         
         # Relative/Velocity mode tests
         q = Qep("QEP99", Qep.MODE_RELATIVE)
         
         # Test that we get the correct speed; default value is 100 overflows per second
         self.set_qep_count(1.0)
-        self.assertEqual(100.0, q.getSpeed()) # represents revolutions per second
-        self.assertEqual(1.0, q.getRawSpeed()) # represents revolutions per period
+        self.assertEqual(100.0, q.get_speed()) # represents revolutions per second
+        self.assertEqual(1.0, q.get_raw_speed()) # represents revolutions per period
         self.set_qep_count(0.5)
-        self.assertEqual(50.0, q.getSpeed()) # represents revolutions per second
-        self.assertEqual(0.5, q.getRawSpeed()) # represents revolutions per period
+        self.assertEqual(50.0, q.get_speed()) # represents revolutions per second
+        self.assertEqual(0.5, q.get_raw_speed()) # represents revolutions per period
         
         # Test non-default values
         q = Qep("QEP99", Qep.MODE_RELATIVE, period = 20000000)
         self.set_qep_count(1.0)
-        self.assertEqual(50.0, q.getSpeed())
-        self.assertEqual(1.0, q.getRawSpeed())
+        self.assertEqual(50.0, q.get_speed())
+        self.assertEqual(1.0, q.get_raw_speed())
         self.set_qep_count(0.5)
-        self.assertEqual(25.0, q.getSpeed())
-        self.assertEqual(0.5, q.getRawSpeed())
+        self.assertEqual(25.0, q.get_speed())
+        self.assertEqual(0.5, q.get_raw_speed())
