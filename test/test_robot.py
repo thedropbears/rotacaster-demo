@@ -36,13 +36,13 @@ class RobotTest(unittest.TestCase):
         # Create a temporary node tree
         self.QEP_A = tmpdir + Qep.PORTS[Robot.MOTOR_A_QEP]
         self.QEP_A_DIR = self.QEP_A
-        Pwm.PORTS[Robot.MOTOR_A_QEP] = self.QEP_A
+        Qep.PORTS[Robot.MOTOR_A_QEP] = self.QEP_A
         self.QEP_B = tmpdir + Qep.PORTS[Robot.MOTOR_B_QEP]
         self.QEP_B_DIR = self.QEP_B
-        Pwm.PORTS[Robot.MOTOR_B_QEP] = self.QEP_B
+        Qep.PORTS[Robot.MOTOR_B_QEP] = self.QEP_B
         self.QEP_C = tmpdir + Qep.PORTS[Robot.MOTOR_C_QEP]
         self.QEP_C_DIR = self.QEP_C
-        Pwm.PORTS[Robot.MOTOR_C_QEP] = self.QEP_C
+        Qep.PORTS[Robot.MOTOR_C_QEP] = self.QEP_C
         if not os.path.exists(self.QEP_A_DIR):
             os.makedirs(self.QEP_A_DIR)
         if not os.path.exists(self.QEP_B_DIR):
@@ -52,13 +52,10 @@ class RobotTest(unittest.TestCase):
     
     def test_robot_init(self):
         r = Robot()
-        self.assertEqual(r.yaw_pid_on, True)
-        self.assertEqual(r.vel_pid_on, True)
+        self.assertEqual(r.yaw_pid_enabled, True)
         self.assertTrue(isinstance(r.yaw_pid, Pid))
         self.assertTrue(isinstance(r.mpu, Mpu))
         self.assertTrue(isinstance(r.motor_a, MotorController))
         self.assertTrue(isinstance(r.motor_b, MotorController))
         self.assertTrue(isinstance(r.motor_c, MotorController))
-        self.assertTrue(isinstance(r.vel_pid_output, VelocityPidOutput))
-        self.assertTrue(isinstance(r.yaw_pid_output, YawPidOutput))
         self.assertEqual(r.current_command, Robot.INIT_COMMAND)
