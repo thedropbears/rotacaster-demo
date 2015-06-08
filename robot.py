@@ -6,8 +6,9 @@ from pwm import Pwm
 from qep import Qep
 from mpu import Mpu
 from motor_controller import MotorController
+import threading
 
-class Robot(object):
+class Robot(threading.Thread):
     
     VEL_P = 0
     VEL_I = 0
@@ -38,13 +39,16 @@ class Robot(object):
     YAW_MOMENTUM_THRESHOLD = math.radians(10.0) # degrees per second
     
     def __init__(self):
+        
         # Velocity PID object setup
         self.vel_pid_output_a = VelocityPidOutput()
         self.vel_pid_output_b = VelocityPidOutput()
         self.vel_pid_output_c = VelocityPidOutput()
+        
         self.vel_pid_a = Pid(self.vel_pid_output_a, Robot.VEL_P, Robot.VEL_I, Robot.VEL_D, Robot.VEL_F)
         self.vel_pid_b = Pid(self.vel_pid_output_b, Robot.VEL_P, Robot.VEL_I, Robot.VEL_D, Robot.VEL_F)
         self.vel_pid_c = Pid(self.vel_pid_output_c, Robot.VEL_P, Robot.VEL_I, Robot.VEL_D, Robot.VEL_F)
+        
         # Qep encoder object setup
         self.qep_a = Qep(Robot.MOTOR_A_QEP)
         self.qep_b = Qep(Robot.MOTOR_B_QEP)
@@ -53,15 +57,20 @@ class Robot(object):
         self.pwm_a = Pwm(Robot.MOTOR_A_PWM)
         self.pwm_b = Pwm(Robot.MOTOR_B_PWM)
         self.pwm_c = Pwm(Robot.MOTOR_C_PWM)
+        
         # Create MotorController objects
         self.motor_a = MotorController(self.pwm_a, self.vel_pid_a, self.vel_pid_output_a, self.qep_a, self.VEL_PID_ENABLED)
         self.motor_b = MotorController(self.pwm_b, self.vel_pid_b, self.vel_pid_output_b, self.qep_b, self.VEL_PID_ENABLED)
         self.motor_c = MotorController(self.pwm_c, self.vel_pid_c, self.vel_pid_output_c, self.qep_c, self.VEL_PID_ENABLED)
         self.motors = [self.motor_a, self.motor_b, self.motor_c]
         
+        # set up pid
         self.yaw_pid_output = YawPidOutput()
         self.yaw_pid = Pid(self.yaw_pid_output, Robot.YAW_P, Robot.YAW_I, Robot.YAW_D)
+        
+        # initialise mpu/imu server module
         self.mpu = Mpu()
+        
         self.current_command = Robot.INIT_COMMAND
         
         # pid *enabled* by default
