@@ -6,7 +6,7 @@ from pwm import Pwm
 from qep import Qep
 from mpu import Mpu
 from motor_controller import MotorController
-import threading
+import threading, time
 
 class Robot(threading.Thread):
     
@@ -70,6 +70,8 @@ class Robot(threading.Thread):
         
         # initialise mpu/imu server module
         self.mpu = Mpu()
+        
+        self.yaw_pid_thread = YawPidThread(self.yaw_pid, self.mpu)
         
         self.current_command = Robot.INIT_COMMAND
         
@@ -137,6 +139,26 @@ class Robot(threading.Thread):
         # set the speeds of the motors
         for i in range(3):
             self.motors[i].set_speed(motor_input[i])
+
+class YawPidThread(threading.Thread):
+    def __init__(self, pid, mpu):
+        assert(isinstance(pid, Pid), "Must pass in a valid Pid object")
+        assert(isinstance(mpu, Mpu), "Must pass in a valid Mpu object")
+        super(YawPidThread, self).__init__()
+        self.pid = pid
+        self.mpu = mpu
+        self.running = threading.Event()
+        self.running.set()
+        self.daemon = True
+        self.last_time = time.time()
+        self.start()
+    
+    def run(self):
+        while self.running.isSet():
+            self.pid.update(self.mpu.get_euler()[0])
+            time.sleep(0.1 - (time.time() - self.last_time))
+            self.last_time = time.time()
+            print "boing"
 
 class VelocityPidOutput(PidOutput):
     value = 0.0

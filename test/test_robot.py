@@ -1,7 +1,7 @@
 """Unit tests for Robot submodule."""
 
 import unittest
-import tempfile, os
+import tempfile, os, time
 from motor_controller import MotorController
 from robot import Robot
 from robot import VelocityPidOutput
@@ -59,6 +59,10 @@ class RobotTest(unittest.TestCase):
         self.assertTrue(isinstance(r.motor_b, MotorController))
         self.assertTrue(isinstance(r.motor_c, MotorController))
         self.assertEqual(r.current_command, Robot.INIT_COMMAND)
+        
+        time.sleep(1)
+        
+        print "after boing"
         
     def test_robot_drive(self):
         
