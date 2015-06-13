@@ -1,5 +1,5 @@
 import threading
-from socket import socket, AF_INET, SOCK_DGRAM
+import socket, sys
 
 MPU_PORT = 4774
 
@@ -40,8 +40,11 @@ class Mpu(threading.Thread):
         return exploded
     
     def make_sock(self):
-        self.sock = socket(AF_INET, SOCK_DGRAM)
-        self.sock.bind(('', MPU_PORT)) # bind to all interfaces/addresses by default
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            self.sock.bind(('', MPU_PORT)) # bind to all interfaces/addresses by default
+        except socket.error, msg:
+            sys.stderr.write("Error: Socket failed to bind %s\n" % msg[1])
     
     def get_euler(self):
         return self.euler
