@@ -1,4 +1,4 @@
-import threading
+import threading, time
 from robot import Robot
 from abc import ABCMeta, abstractmethod
 
@@ -7,29 +7,46 @@ class Commands(threading.Thread):
     
     COMMAND_LOOP_SPEED = 50.0 #hz
     
-    COMMANDS = {"OmniDrive" : OmniDrive()}
+    commands = {}
     
-    def __init__(self, robot, init_command):
-        super(YawPidThread, self).__init__()
+    DEFAULT_COMMAND = "OmniDrive"
+    
+    def __init__(self, robot):
+        super(Commands, self).__init__()
         self.robot = robot
-        self.current_command = current_command
-        self.last_command = current_command
-        if not isinstance(robot, Robot):
-            raise Exception("Must pass in a valid Robot object for the robot parameter")
-        if not init_command in self.COMMANDS.keys():
-            raise Exception("Must pass in a valid command string. Check Commands.COMMANDS")
+        self.omni_drive = OmniDrive(self)
+        self.commands["OmniDrive"]= self.omni_drive
+        self.current_command = self.commands[self.DEFAULT_COMMAND]
+        self.last_command = self.current_command
         self.running = threading.Event()
         self.running.set()
         self.daemon = True
         self.last_time = time.time()
         self.start()
         
-    def commands(self):
-        pass
+    def handle_commands(self):
+        if not self.current_command == self.last_command:
+            self.last_command.end()
+            self.current_command.initialise()
+            self.current_command.run()
+        elif self.current_command.is_finished():
+            self.current_command = self.commands[self.DEFAULT_COMMAND]
+            self.last_command.end()
+            self.current_command.initialise()
+            self.current_command.run()
+            self.last_command = self.current_command
+        else:
+            self.current_command.run()
+    
+    def set_command(self, command_id):
+        if command_id in self.commands.keys():
+            self.current_command = self.commands[command_id]
+        else:
+            print "Can not pass in invalid command"
     
     def run(self):
         while self.running.isSet():
-            self.commands()
+            self.handle_commands()
             time.sleep(1.0/self.COMMAND_LOOP_SPEED - (time.time() - self.last_time))
             self.last_time = time.time()
 
@@ -40,10 +57,9 @@ class Command(object):
     def __init__(self, name, commands):
         self.name = name
         self.commands = commands
-        assert(isinstance(robot, Robot), "Must pass in a valid robot object to the command constructor")
     
     @abstractmethod
-    def initialize(self):
+    def initialise(self):
         """Called by commands when this command is started"""
         pass
     
@@ -62,12 +78,12 @@ class Command(object):
         """Called by commands when this command is ended"""
         pass
 
-class OmniDrive(object):
+class OmniDrive(Command):
     
     def __init__(self, commands):
-        super.__init__("OmniDrive", commands)
+        super(OmniDrive, self).__init__("OmniDrive", commands)
     
-    def initialize(self, robot):
+    def initialise(self):
         pass
     
     def run(self):
@@ -83,4 +99,4 @@ class OmniDrive(object):
         return True
     
     def end(self):
-        robot.drive(0.0, 0.0, 0.0, 0.0)
+        self.commands.robot.drive(0.0, 0.0, 0.0, 0.0)
