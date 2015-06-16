@@ -1,4 +1,4 @@
-import glob
+import glob, os
 
 class Pwm(object):
     PORTS = {
@@ -19,7 +19,7 @@ class Pwm(object):
     STATUS = "/run" # the file that holds a 1 or a 0 telling the bbb weather to have pwm on or not
     PERIOD = "/period" # the file that holds the PWM period, in ns
         
-    def __init__(self, pwm_id, min_duty = 600000, max_duty = 2400000, period = 10000000):
+    def __init__(self, pwm_id, min_duty = 1000000, max_duty = 2000000, period = 10000000):
         if not pwm_id in Pwm.PORTS.keys():
             raise Exception("Must pass in a recognised BBB PWM port: " + str(Pwm.PORTS.keys()))
         self.pwm_id = pwm_id
@@ -36,8 +36,9 @@ class Pwm(object):
             speed = 1.0
         if speed <= -1.0:
             speed = -1.0
+        speed = -speed
         # convert speed from float from 0 to 1 into a time in ns
-        duty_in_ns = ((speed+1.0)/2.0) * (self.max_duty - self.min_duty) + self.min_duty
+        duty_in_ns = self.period - int(((speed+1.0)/2.0) * (self.max_duty - self.min_duty) + self.min_duty)
         self.write(self.pwm_dir + Pwm.DUTY, str(duty_in_ns))
         return duty_in_ns
     

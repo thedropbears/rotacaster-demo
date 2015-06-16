@@ -44,7 +44,10 @@ class MotorController(threading.Thread):
             self.last_time = time.time()
     
     def set_speed(self, speed):
-        assert(-1.0 <= speed <= 1.0, "Must pass in a speed in range -1 to 1")
+        if speed >= 1.0:
+            speed = 1.0
+        elif speed <= -1.0:
+            speed = -1.0
         if self.pid_enabled:
             self.pid.set_set_point(speed)
         self.speed = speed

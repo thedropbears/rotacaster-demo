@@ -2,9 +2,9 @@ import glob
 
 class Qep(object):
     PORTS = {
-        "QEP0" : "/sys/devices/ocp.2/48300000.epwmss/48300180.eqep",
-        "QEP1" : "/sys/devices/ocp.2/48302000.epwmss/48302180.eqep",
-        "QEP2" : "/sys/devices/ocp.2/48304000.epwmss/48304180.eqep" }
+        "QEP0" : "/sys/devices/ocp.3/48300000.epwmss/48300180.eqep",
+        "QEP1" : "/sys/devices/ocp.3/48302000.epwmss/48302180.eqep",
+        "QEP2" : "/sys/devices/ocp.3/48304000.epwmss/48304180.eqep" }
     
     # The counting mode of the encoder, 0=absolute, 1=relative
     MODE = "/mode"
@@ -41,19 +41,19 @@ class Qep(object):
         """Return the number of revolutions between here and the zero point as a float, with 1.0 being 1 revolution"""
         if self.mode == Qep.MODE_RELATIVE:
             raise Exception("Number of absolute revolutions is unavailable in velocity mode. Try Qep.getSpeed() instead")
-        return (float(open(self.qep_dir+Qep.POSITION).read())/4.0/self.cpr)
+        return -(float(open(self.qep_dir+Qep.POSITION).read()))#/4.0/self.cpr)
     
     def get_speed(self):
-        """Return the speed of the encoder in relative mode in revolutions per second"""
+        """Return the scpeed of the encoder in relative mode in revolutions per second"""
         if self.mode == Qep.MODE_ABSOLUTE:
             raise Exception("Speed of wheel is unavailable in absolute mode. Try Qep.getRevolutions() instead")
-        return (float(open(self.qep_dir+Qep.POSITION).read())/self.period_in_seconds)
+        return -(float(open(self.qep_dir+Qep.POSITION).read())/self.period_in_seconds)
     
     def get_raw_speed(self):
         """Return the speed of the encoder in relative mode in revolutions per period"""
         if self.mode == Qep.MODE_ABSOLUTE:
             raise Exception("Speed of wheel is unavailable in absolute mode. Try Qep.getRevolutions() instead")
-        return (float(open(self.qep_dir+Qep.POSITION).read()))
+        return -(float(open(self.qep_dir+Qep.POSITION).read()))
     
     def write(self, path, data):
         """Overwrites or creates file at path and writes data to it"""

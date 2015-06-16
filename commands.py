@@ -11,9 +11,10 @@ class Commands(threading.Thread):
     
     DEFAULT_COMMAND = "OmniDrive"
     
-    def __init__(self, robot):
+    def __init__(self, robot, input):
         super(Commands, self).__init__()
         self.robot = robot
+        self.input = input
         self.omni_drive = OmniDrive(self)
         self.commands["OmniDrive"]= self.omni_drive
         self.current_command = self.commands[self.DEFAULT_COMMAND]

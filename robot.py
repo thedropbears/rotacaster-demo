@@ -8,7 +8,7 @@ from mpu import Mpu
 from motor_controller import MotorController
 import threading, time
 
-class Robot(threading.Thread):
+class Robot(object):
     
     VEL_P = 0
     VEL_I = 0
@@ -20,11 +20,11 @@ class Robot(threading.Thread):
     YAW_D = 0
     
     # Pwm and Qep ids for motor controllers a, b and c
-    MOTOR_A_PWM = "PWM1A-14"
+    MOTOR_A_PWM = "PWM0B-29"
     MOTOR_A_QEP = "QEP0"
     MOTOR_B_PWM = "PWM1A-36"
     MOTOR_B_QEP = "QEP1"
-    MOTOR_C_PWM = "PWM1B-16"
+    MOTOR_C_PWM = "PWM2A-45"
     MOTOR_C_QEP = "QEP2"
     
     INIT_COMMAND = "OmniDrive" # placeholder
@@ -142,8 +142,10 @@ class Robot(threading.Thread):
 
 class YawPidThread(threading.Thread):
     def __init__(self, pid, mpu):
-        assert(isinstance(pid, Pid), "Must pass in a valid Pid object")
-        assert(isinstance(mpu, Mpu), "Must pass in a valid Mpu object")
+        if not isinstance(pid, Pid):
+            raise Exception("Must pass in valid Pid object to YawPidThread")
+        if not isinstance(mpu, Mpu):
+            raise Exception("Must pass in valid Mpu object to YawPidThread")
         super(YawPidThread, self).__init__()
         self.pid = pid
         self.mpu = mpu
@@ -158,7 +160,6 @@ class YawPidThread(threading.Thread):
             self.pid.update(self.mpu.get_euler()[0])
             time.sleep(0.1 - (time.time() - self.last_time))
             self.last_time = time.time()
-            print "boing"
 
 class VelocityPidOutput(PidOutput):
     value = 0.0
