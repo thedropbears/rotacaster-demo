@@ -89,10 +89,10 @@ class OmniDrive(Command):
     
     def run(self):
         # placeholder code until gamepad drivers are written
-        vX = 0.0 # up and down on the joystick!
-        vY = 0.0
-        vZ = 0.0
-        throttle = 0.0
+        vX = self.commands.input.get_left_stick_y() # up and down on the joystick!
+        vY = self.commands.input.get_left_stick_x()
+        vZ = self.commands.input.get_right_stick_x()
+        throttle = 1.0
         
         self.commands.robot.drive(vX, vY, vZ, throttle)
     
