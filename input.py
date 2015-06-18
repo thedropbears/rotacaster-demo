@@ -9,7 +9,7 @@ class Input(threading.Thread):
     axis_map = {"left_stick_x" : 0, "left_stick_y" : 1, "right_stick_x" : 2, "right_stick_y" : 3,
                      "left_trigger" : 4, "right_trigger" : 5}
     
-    axis_values = [0.0, 0.0, 0.0, 0.0, 0.0]
+    axis_values = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     
     button_map = {"a" : 0, "b" : 1, "x" : 2, "y" : 3, "left_button" : 4, "right_button" : 5, "back" : 6, "start" : 7, "left_stick_press" : 9, "right_stick_press" : 10}
     
@@ -17,6 +17,7 @@ class Input(threading.Thread):
         super(Input, self).__init__()
         self.robot = robot
         self.rotation_locker = False
+        self.last_pressed = -1
         os.environ["SDL_VIDEODRIVER"] = "dummy"
         pygame.init()
         self.js = pygame.joystick.Joystick(0)
@@ -35,6 +36,9 @@ class Input(threading.Thread):
                     if event.axis <= 5:
                         if not event.axis == self.axis_map["right_stick_x"] or not self.rotation_locker:
                             self.axis_values[event.axis] = event.value
+                            if event.axis == self.axis_map["left_trigger"] or event.axis == self.axis_map["right_trigger"]:
+                                print "disabled"
+                                self.robot.enabled = False
                 elif event.type == JOYBUTTONDOWN:
                     if event.button == self.button_map["start"]:
                         self.robot.mpu.zero_yaw()
@@ -42,7 +46,11 @@ class Input(threading.Thread):
                         self.rotation_locker = not self.rotation_locker
                         if not self.rotation_locker:
                             self.axis_values[self.axis_map["right_stick_x"]] = 0.0
-            #time.sleep(1.0/self.MONITOR_JOYSTICK_SPEED - (time.time() - self.last_time))
+                    elif event.button == self.button_map["right_button"] and self.last_pressed == self.button_map["left_button"]:
+                        print "enabled"
+                        self.robot.enabled = True
+                    self.last_pressed = event.button
+                    
             self.last_time = time.time()
     
     def get_left_stick_x(self):

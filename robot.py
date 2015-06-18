@@ -81,8 +81,19 @@ class Robot(object):
         self.pid_in_control = False
         
         self.field_centered = True
+        
+        self.enabled = False
     
     def drive(self, vX, vY, vZ, throttle):
+        
+        if not self.enabled:
+            for motor in self.motors:
+                motor.set_speed(0.0)
+            self.pwm_a.set_speed(0.0)
+            self.pwm_b.set_speed(0.0)
+            self.pwm_c.set_speed(0.0)
+            return
+        
         vPID = 0.0
         
         if self.field_centered:
@@ -90,11 +101,11 @@ class Robot(object):
         
         # Drive equations that translate vX, vY and vZ into commands to be sent to the motors
         # front motor
-        mA = ((0.0*vX) + (vY * 1.0) + vZ/3.0)
+        mA = (((0.0*vX) + (vY * 1.0))/2.0 + vZ/3.0)
         # bottom left motor
-        mB = ((-vX * 1.0) + (-vY / 2.0) + vZ/3.0)
+        mB = (((-vX * math.sin(math.radians(60))) + (-vY / 2.0))/2.0 + vZ/3.0)
         # bottom right motor
-        mC = ((vX * 1.0) + (-vY / 2.0) + vZ/3.0)
+        mC = (((vX * math.sin(math.radians(60))) + (-vY / 2.0))/2.0 + vZ/3.0)
         
         motor_input = [mA, mB, mC]
         
