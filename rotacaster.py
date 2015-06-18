@@ -6,8 +6,12 @@ from robot import Robot
 from commands import Commands
 from input import Input
 from pwm import Pwm
+import os
 
 def main():
+    pid = str(os.getpid())
+    file("/var/run/rotacaster.pid", "w").write(pid)
+    
     robot = Robot()
     input = Input(robot)
     commands = Commands(robot, input)
