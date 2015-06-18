@@ -10,12 +10,12 @@ import threading, time
 
 class Robot(object):
     
-    VEL_P = 0
-    VEL_I = 0
-    VEL_D = 0
+    VEL_P = 0.0
+    VEL_I = 0.0
+    VEL_D = 0.0
     VEL_F = 1.0
     
-    YAW_P = 0
+    YAW_P = 0.0
     YAW_I = 0
     YAW_D = 0
     
@@ -66,7 +66,7 @@ class Robot(object):
         
         # set up pid
         self.yaw_pid_output = YawPidOutput()
-        self.yaw_pid = Pid(self.yaw_pid_output, Robot.YAW_P, Robot.YAW_I, Robot.YAW_D)
+        self.yaw_pid = Pid(self.yaw_pid_output, Robot.YAW_P, Robot.YAW_I, Robot.YAW_D, izone=1.0)
         
         # initialise mpu/imu server module
         self.mpu = Mpu()
@@ -76,20 +76,25 @@ class Robot(object):
         self.current_command = Robot.INIT_COMMAND
         
         # pid *enabled* by default
-        self.yaw_pid_enabled = True
+        self.yaw_pid_enabled = False
         # pid not in *control* by default, this is automatically set by drive
         self.pid_in_control = False
+        
+        self.field_centered = True
     
     def drive(self, vX, vY, vZ, throttle):
         vPID = 0.0
         
+        if self.field_centered:
+            vX, vY = self.field_orient(vX, vY, self.mpu.get_euler()[0])
+        
         # Drive equations that translate vX, vY and vZ into commands to be sent to the motors
         # front motor
-        mA = ((0.0*vX) + (vY * Robot.ROBOT_MAX_Y_SPEED) + vZ)
+        mA = ((0.0*vX) + (vY * 1.0) + vZ/3.0)
         # bottom left motor
-        mB = ((-vX * Robot.ROBOT_MAX_Y_SPEED /  Robot.ROBOT_MAX_X_SPEED) + (-vY * 1.0) + vZ)
+        mB = ((-vX * 1.0) + (-vY / 2.0) + vZ/3.0)
         # bottom right motor
-        mC = ((vX * Robot.ROBOT_MAX_Y_SPEED /  Robot.ROBOT_MAX_X_SPEED) + (-vY * 1.0) + vZ)
+        mC = ((vX * 1.0) + (-vY / 2.0) + vZ/3.0)
         
         motor_input = [mA, mB, mC]
         
@@ -139,6 +144,11 @@ class Robot(object):
         # set the speeds of the motors
         for i in range(3):
             self.motors[i].set_speed(motor_input[i])
+    
+    def field_orient(self, vX, vY, yaw_angle):
+        oriented_vx = vX*math.cos(yaw_angle)+vY*math.sin(yaw_angle)
+        oriented_vy = -vX*math.sin(yaw_angle)+vY*math.cos(yaw_angle)
+        return oriented_vx, oriented_vy
 
 class YawPidThread(threading.Thread):
     def __init__(self, pid, mpu):

@@ -9,6 +9,8 @@ class MotorController(threading.Thread):
     #list of motor controllers with pwm values in a dict inside the dict
     MOTOR_CONTROLLER_VALUES = {"VICTOR_SP" : {"min_duty" : 600000, "max_duty" : 2400000, "period" : 10000000}}
     
+    MAX_QEP_SPEED = 275.0
+    
     def __init__(self, pwm, pid, pid_output, qep, pid_enabled = True):
         super(MotorController, self).__init__()
         if qep.mode == Qep.MODE_RELATIVE:
@@ -33,14 +35,14 @@ class MotorController(threading.Thread):
             if self.pid_enabled:
                 # Get the number of revolutions relative to the start point 
                 self.qep_position = self.qep.get_revolutions()
-                change_since_last = self.qep_position - self.last_qep # the change since the last iteration
+                change_since_last = -(self.qep_position - self.last_qep) # the change since the last iteration
                 self.last_qep = self.qep_position
-                self.pid.update(change_since_last)
+                self.pid.update(1.0*change_since_last/MotorController.MAX_QEP_SPEED)
                 self.speed_to_command = self.pid_output.value
             else:
                 self.speed_to_command = self.speed
             self.pwm.set_speed(self.speed_to_command)
-            time.sleep(0.02 - (time.time() - self.last_time))
+            time.sleep(0.1 - (time.time() - self.last_time))
             self.last_time = time.time()
     
     def set_speed(self, speed):

@@ -5,7 +5,7 @@ from abc import ABCMeta, abstractmethod
 class Commands(threading.Thread):
     """A class that holds all of the commands and runs the current one in a thread"""
     
-    COMMAND_LOOP_SPEED = 50.0 #hz
+    COMMAND_LOOP_SPEED = 10.0 #hz
     
     commands = {}
     
