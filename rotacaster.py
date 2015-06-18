@@ -23,7 +23,8 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception:
+    except Exception as e:
+        print e
         pa = Pwm(Robot.MOTOR_A_PWM)
         pb = Pwm(Robot.MOTOR_B_PWM)
         pc = Pwm(Robot.MOTOR_C_PWM)

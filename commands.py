@@ -16,7 +16,9 @@ class Commands(threading.Thread):
         self.robot = robot
         self.input = input
         self.omni_drive = OmniDrive(self)
+        self.square_drive = SquareDrive(self)
         self.commands["OmniDrive"]= self.omni_drive
+        self.commands["SquareDrive"]=self.square_drive
         self.current_command = self.commands[self.DEFAULT_COMMAND]
         self.last_command = self.current_command
         self.running = threading.Event()
@@ -26,18 +28,19 @@ class Commands(threading.Thread):
         self.start()
         
     def handle_commands(self):
-        if not self.current_command == self.last_command:
+        if not self.commands[self.robot.current_command] == self.last_command:
             self.last_command.end()
-            self.current_command.initialise()
-            self.current_command.run()
-        elif self.current_command.is_finished():
-            self.current_command = self.commands[self.DEFAULT_COMMAND]
+            self.last_command = self.commands[self.robot.current_command]
+            self.commands[self.robot.current_command].initialise()
+            self.commands[self.robot.current_command].run()
+        elif self.commands[self.robot.current_command].is_finished():
+            self.robot.current_command = Robot.INIT_COMMAND
             self.last_command.end()
-            self.current_command.initialise()
-            self.current_command.run()
-            self.last_command = self.current_command
+            self.commands[self.robot.current_command].initialise()
+            self.commands[self.robot.current_command].run()
+            self.last_command = self.commands[self.robot.current_command]
         else:
-            self.current_command.run()
+            self.commands[self.robot.current_command].run()
     
     def set_command(self, command_id):
         if command_id in self.commands.keys():
@@ -88,7 +91,6 @@ class OmniDrive(Command):
         pass
     
     def run(self):
-        # placeholder code until gamepad drivers are written
         vX = self.commands.input.get_left_stick_y() # up and down on the joystick!
         vY = self.commands.input.get_left_stick_x()
         vZ = self.commands.input.get_right_stick_x()
@@ -98,6 +100,53 @@ class OmniDrive(Command):
     
     def is_finished(self):
         return True
+    
+    def end(self):
+        self.commands.robot.drive(0.0, 0.0, 0.0, 0.0)
+
+class SquareDrive(Command):
+    
+    #      vX, vY
+    FORWARD = [1.0, 0,0]
+    RIGHT = [0.0, -1.0]
+    BACK = [-1.0, 0.0]
+    LEFT = [0.0, 1.0]
+    order = [FORWARD, RIGHT, BACK, LEFT]
+    
+    QEP_THRESHOLD = 100
+    
+    def __init__(self, commands):
+        super(SquareDrive, self).__init__("OmniDrive", commands)
+        self.current_direction = 0
+        print "__init__"
+    
+    def initialise(self):
+        self.commands.robot.qep_a.set_position(0)
+        self.commands.robot.qep_b.set_position(0)
+        self.commands.robot.qep_c.set_position(0)
+        print "init"
+    
+    def run(self):
+        qep_average = (self.commands.robot.qep_a.get_revolutions() + self.commands.robot.qep_b.get_revolutions() + self.commands.robot.qep_c.get_revolutions())/3.0
+        print "QEP AVG: ", qep_average
+        if qep_average  > self.QEP_THRESHOLD:
+            self.commands.robot.qep_a.set_position(0.0)
+            self.commands.robot.qep_b.set_position(0.0)
+            self.commands.robot.qep_c.set_position(0.0)
+            if not self.current_direction >= len(self.order) - 1:
+                self.current_direction += 1
+            else:
+                self.commands.robot.drive(0.0, 0.0, 0.0, 0,0)
+                return
+        print "running in square"
+        
+        self.commands.robot.drive(self.order[self.current_direction][0], self.order[self.current_direction][1], 1.0, 1.0)
+    
+    def is_finished(self):
+        if not self.current_direction >= len(self.order) - 1:
+            return False
+        else:
+            return True
     
     def end(self):
         self.commands.robot.drive(0.0, 0.0, 0.0, 0.0)

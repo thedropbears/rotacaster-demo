@@ -27,7 +27,7 @@ class Robot(object):
     MOTOR_C_PWM = "PWM2A-45"
     MOTOR_C_QEP = "QEP2"
     
-    INIT_COMMAND = "OmniDrive" # placeholder
+    INIT_COMMAND = "OmniDrive"
     
     VEL_PID_ENABLED = True
     

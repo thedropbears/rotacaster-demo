@@ -47,6 +47,8 @@ class Input(threading.Thread):
                             self.axis_values[self.axis_map["right_stick_x"]] = 0.0
                     elif event.button == self.button_map["right_button"] and self.last_pressed == self.button_map["left_button"]:
                         self.robot.enabled = True
+                    elif event.button == self.button_map["a"]:
+                        self.robot.current_command = "SquareDrive"
                     self.last_pressed = event.button
                     
             self.last_time = time.time()

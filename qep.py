@@ -55,6 +55,9 @@ class Qep(object):
             raise Exception("Speed of wheel is unavailable in absolute mode. Try Qep.getRevolutions() instead")
         return -(float(open(self.qep_dir+Qep.POSITION).read()))
     
+    def set_position(self, position):
+        self.write(self.qep_dir+self.POSITION, str(position))
+    
     def write(self, path, data):
         """Overwrites or creates file at path and writes data to it"""
         f = open(path, "w")
