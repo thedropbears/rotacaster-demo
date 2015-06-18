@@ -38,6 +38,9 @@ class Robot(object):
     # as you set the set point while still rotating
     YAW_MOMENTUM_THRESHOLD = math.radians(10.0) # degrees per second
     
+    TIME_TO_AUTO_DISABLE = 10 # seconds till we automatically disable
+    AUTO_DISABLE_THRESHOLD = 0.05
+    
     def __init__(self):
         
         # Velocity PID object setup
@@ -83,16 +86,24 @@ class Robot(object):
         self.field_centered = True
         
         self.enabled = False
+        
+        self.last_input_time = time.time()
     
     def drive(self, vX, vY, vZ, throttle):
         
         if not self.enabled:
+            self.last_input_time = time.time()
             for motor in self.motors:
                 motor.set_speed(0.0)
             self.pwm_a.set_speed(0.0)
             self.pwm_b.set_speed(0.0)
             self.pwm_c.set_speed(0.0)
             return
+        if math.fabs(vX) <= self.AUTO_DISABLE_THRESHOLD and math.fabs(vY) <= self.AUTO_DISABLE_THRESHOLD and math.fabs(vZ) <= self.AUTO_DISABLE_THRESHOLD:
+            if time.time() - self.last_input_time > self.TIME_TO_AUTO_DISABLE:
+                self.enabled = False
+        else:
+            self.last_input_time = time.time()
         
         vPID = 0.0
         

@@ -37,7 +37,6 @@ class Input(threading.Thread):
                         if not event.axis == self.axis_map["right_stick_x"] or not self.rotation_locker:
                             self.axis_values[event.axis] = event.value
                             if event.axis == self.axis_map["left_trigger"] or event.axis == self.axis_map["right_trigger"]:
-                                print "disabled"
                                 self.robot.enabled = False
                 elif event.type == JOYBUTTONDOWN:
                     if event.button == self.button_map["start"]:
@@ -47,7 +46,6 @@ class Input(threading.Thread):
                         if not self.rotation_locker:
                             self.axis_values[self.axis_map["right_stick_x"]] = 0.0
                     elif event.button == self.button_map["right_button"] and self.last_pressed == self.button_map["left_button"]:
-                        print "enabled"
                         self.robot.enabled = True
                     self.last_pressed = event.button
                     
