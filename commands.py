@@ -1,6 +1,7 @@
 import threading, time
 from robot import Robot
 from abc import ABCMeta, abstractmethod
+import math
 
 class Commands(threading.Thread):
     """A class that holds all of the commands and runs the current one in a thread"""
@@ -17,8 +18,10 @@ class Commands(threading.Thread):
         self.input = input
         self.omni_drive = OmniDrive(self)
         self.square_drive = SquareDrive(self)
+        self.circle_drive = CircleDrive(self)
         self.commands["OmniDrive"]= self.omni_drive
         self.commands["SquareDrive"]=self.square_drive
+        self.commands["CircleDrive"]=self.circle_drive
         self.current_command = self.commands[self.DEFAULT_COMMAND]
         self.last_command = self.current_command
         self.running = threading.Event()
@@ -28,7 +31,7 @@ class Commands(threading.Thread):
         self.start()
         
     def handle_commands(self):
-        if not self.commands[self.robot.current_command] == self.last_command:
+        if not self.commands[self.robot.current_command] == self.last_command or self.robot.interrupted:
             self.last_command.end()
             self.last_command = self.commands[self.robot.current_command]
             self.commands[self.robot.current_command].initialise()
@@ -41,7 +44,8 @@ class Commands(threading.Thread):
             self.last_command = self.commands[self.robot.current_command]
         else:
             self.commands[self.robot.current_command].run()
-    
+        self.robot.interrupted = False
+        
     def set_command(self, command_id):
         if command_id in self.commands.keys():
             self.current_command = self.commands[command_id]
@@ -102,7 +106,7 @@ class OmniDrive(Command):
         return True
     
     def end(self):
-        self.commands.robot.drive(0.0, 0.0, 0.0, 0.0)
+        pass #self.commands.robot.drive(0.0, 0.0, 0.0, 0.0)
 
 class SquareDrive(Command):
     
@@ -111,42 +115,79 @@ class SquareDrive(Command):
     RIGHT = [0.0, -1.0]
     BACK = [-1.0, 0.0]
     LEFT = [0.0, 1.0]
-    order = [FORWARD, RIGHT, BACK, LEFT]
+    order = [RIGHT, BACK, LEFT, FORWARD]
     
-    QEP_THRESHOLD = 100
+    SEGMENT_DURATION = 4
+    CARTESIAN_SCALE = 0.5
     
     def __init__(self, commands):
-        super(SquareDrive, self).__init__("OmniDrive", commands)
+        super(SquareDrive, self).__init__("SquareDrive", commands)
         self.current_direction = 0
-        print "__init__"
+        self.last_segment_time = time.time()
+        self.initialising = True
     
     def initialise(self):
-        self.commands.robot.qep_a.set_position(0)
-        self.commands.robot.qep_b.set_position(0)
-        self.commands.robot.qep_c.set_position(0)
-        print "init"
+        self.commands.robot.mpu.zero_yaw()
+        self.initialising = True
+        self.last_segment_time = time.time()
+        self.current_direction = 0
     
     def run(self):
-        qep_average = (self.commands.robot.qep_a.get_revolutions() + self.commands.robot.qep_b.get_revolutions() + self.commands.robot.qep_c.get_revolutions())/3.0
-        print "QEP AVG: ", qep_average
-        if qep_average  > self.QEP_THRESHOLD:
-            self.commands.robot.qep_a.set_position(0.0)
-            self.commands.robot.qep_b.set_position(0.0)
-            self.commands.robot.qep_c.set_position(0.0)
-            if not self.current_direction >= len(self.order) - 1:
-                self.current_direction += 1
+        if self.initialising:
+            # Drive to a corner to begin
+            if time.time() - self.last_segment_time > self.SEGMENT_DURATION/2.0:
+                self.initialising = False
+                self.last_segment_time = time.time()
             else:
-                self.commands.robot.drive(0.0, 0.0, 0.0, 0,0)
-                return
-        print "running in square"
+                self.commands.robot.drive(1.0, 1.0, 0.0, self.CARTESIAN_SCALE)
+            return
+        if time.time() - self.last_segment_time  > self.SEGMENT_DURATION:
+            self.current_direction = (self.current_direction + 1) % len(self.order)
+            self.last_segment_time = time.time()
         
-        self.commands.robot.drive(self.order[self.current_direction][0], self.order[self.current_direction][1], 1.0, 1.0)
+        self.commands.robot.drive(self.order[self.current_direction][0]*self.CARTESIAN_SCALE,
+                                  self.order[self.current_direction][1]*self.CARTESIAN_SCALE,
+                                  1.0, 1.0)
     
     def is_finished(self):
-        if not self.current_direction >= len(self.order) - 1:
-            return False
-        else:
-            return True
+        return False # Run until stopped
     
     def end(self):
         self.commands.robot.drive(0.0, 0.0, 0.0, 0.0)
+
+class CircleDrive(Command):
+        
+    CIRCLE_DURATION = 20
+    CARTESIAN_SCALE = 0.6
+
+    def __init__(self, commands):
+        super(CircleDrive, self).__init__("CircleDrive", commands)
+        self.start_time = time.time()
+        self.initialising = True
+    
+    def initialise(self):
+        self.commands.robot.mpu.zero_yaw()
+        self.initialising = True
+        self.start_time = time.time()
+        self.current_direction = 0
+    
+    def run(self):
+        if self.initialising:
+            # Drive to a corner to begin
+            if time.time() - self.start_time > self.CIRCLE_DURATION/(2.0*3.14):
+                self.initialising = False
+                self.start_time = time.time()
+            else:
+                self.commands.robot.drive(1.0, 0.0, 0.0, self.CARTESIAN_SCALE)
+            return
+        
+        omega = (time.time() - self.start_time)/self.CIRCLE_DURATION * 2.0 * 3.14159
+        self.commands.robot.drive(-math.sin(omega)*self.CARTESIAN_SCALE,
+                                  math.cos(omega)*self.CARTESIAN_SCALE, 1.0, 1.0)
+    
+    def is_finished(self):
+        return False # Run until stopped
+    
+    def end(self):
+        self.commands.robot.drive(0.0, 0.0, 0.0, 0.0)
+

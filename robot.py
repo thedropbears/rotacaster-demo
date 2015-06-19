@@ -87,6 +87,7 @@ class Robot(object):
         self.field_centered = True
         
         self.enabled = False
+        self.interrupted = False
         
         self.last_input_time = time.time()
     
@@ -100,12 +101,14 @@ class Robot(object):
                 p.set_speed(0.0)
                 p.pwm_off()
             return
+        else:
+            for p in self.pwms:
+                p.pwm_on()
+
         if math.fabs(vX) <= self.AUTO_DISABLE_THRESHOLD and math.fabs(vY) <= self.AUTO_DISABLE_THRESHOLD and math.fabs(vZ) <= self.AUTO_DISABLE_THRESHOLD:
             if time.time() - self.last_input_time > self.TIME_TO_AUTO_DISABLE:
                 self.enabled = False
         else:
-            for p in self.pwms:
-                p.pwm_on()
             self.last_input_time = time.time()
         
         vPID = 0.0

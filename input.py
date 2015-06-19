@@ -36,8 +36,10 @@ class Input(threading.Thread):
                     if event.axis <= 5:
                         if not event.axis == self.axis_map["right_stick_x"] or not self.rotation_locker:
                             self.axis_values[event.axis] = event.value
-                            if event.axis == self.axis_map["left_trigger"] or event.axis == self.axis_map["right_trigger"]:
-                                self.robot.enabled = False
+                        if event.axis == self.axis_map["left_trigger"] or event.axis == self.axis_map["right_trigger"]:
+                            self.robot.current_command = "OmniDrive"
+                            self.robot.enabled = False
+                            self.robot.interrupted = True
                 elif event.type == JOYBUTTONDOWN:
                     if event.button == self.button_map["start"]:
                         self.robot.mpu.zero_yaw()
@@ -47,8 +49,11 @@ class Input(threading.Thread):
                             self.axis_values[self.axis_map["right_stick_x"]] = 0.0
                     elif event.button == self.button_map["right_button"] and self.last_pressed == self.button_map["left_button"]:
                         self.robot.enabled = True
+                        self.robot.drive(0,0,0,0) # Turn the motor controller lights on
                     elif event.button == self.button_map["a"]:
                         self.robot.current_command = "SquareDrive"
+                    elif event.button == self.button_map["b"]:
+                        self.robot.current_command = "CircleDrive"
                     self.last_pressed = event.button
                     
             self.last_time = time.time()
