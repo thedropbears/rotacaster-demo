@@ -60,6 +60,7 @@ class Robot(object):
         self.pwm_a = Pwm(Robot.MOTOR_A_PWM)
         self.pwm_b = Pwm(Robot.MOTOR_B_PWM)
         self.pwm_c = Pwm(Robot.MOTOR_C_PWM)
+        self.pwms = [self.pwm_a, self.pwm_b, self.pwm_c]
         
         # Create MotorController objects
         self.motor_a = MotorController(self.pwm_a, self.vel_pid_a, self.vel_pid_output_a, self.qep_a, self.VEL_PID_ENABLED)
@@ -95,14 +96,16 @@ class Robot(object):
             self.last_input_time = time.time()
             for motor in self.motors:
                 motor.set_speed(0.0)
-            self.pwm_a.set_speed(0.0)
-            self.pwm_b.set_speed(0.0)
-            self.pwm_c.set_speed(0.0)
+            for p in self.pwms:
+                p.set_speed(0.0)
+                p.pwm_off()
             return
         if math.fabs(vX) <= self.AUTO_DISABLE_THRESHOLD and math.fabs(vY) <= self.AUTO_DISABLE_THRESHOLD and math.fabs(vZ) <= self.AUTO_DISABLE_THRESHOLD:
             if time.time() - self.last_input_time > self.TIME_TO_AUTO_DISABLE:
                 self.enabled = False
         else:
+            for p in self.pwms:
+                p.pwm_on()
             self.last_input_time = time.time()
         
         vPID = 0.0
