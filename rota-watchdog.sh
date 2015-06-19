@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 while true; do
   if [ -f /var/run/rotacaster.pid ]; then
