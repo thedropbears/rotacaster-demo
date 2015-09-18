@@ -118,7 +118,7 @@ class Robot(object):
         
         # Drive equations that translate vX, vY and vZ into commands to be sent to the motors
         # front motor
-        mA = (((0.0*vX) + (vY * 1.0))/2.0 + vZ/3.0)
+        mA = -(((0.0*vX) + (vY * 1.0))/2.0 + vZ/3.0)
         # bottom left motor
         mB = (((-vX * math.sin(math.radians(60))) + (-vY / 2.0))/2.0 + vZ/3.0)
         # bottom right motor
