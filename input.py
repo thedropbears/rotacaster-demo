@@ -54,6 +54,8 @@ class Input(threading.Thread):
                         self.robot.current_command = "SquareDrive"
                     elif event.button == self.button_map["b"]:
                         self.robot.current_command = "CircleDrive"
+                    elif event.button == self.button_map["back"]:
+                        self.robot.field_centered = not self.robot.field_centered
                     self.last_pressed = event.button
                     
             self.last_time = time.time()
