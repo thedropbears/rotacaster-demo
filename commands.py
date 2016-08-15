@@ -21,18 +21,21 @@ def drive(vX, vY, vZ, throttle, gyro, pwms):
         motor_input[i] /= max
         motor_input[i] *= throttle
         pwms[i].set_speed(motor_input[i])
+    return drive
 
 
-def field_orient(self, vX, vY, yaw_angle):
+def field_orient(vX, vY, yaw_angle):
     oriented_vx = vX * math.cos(yaw_angle) + vY * math.sin(yaw_angle)
     oriented_vy = -vX * math.sin(yaw_angle) + vY * math.cos(yaw_angle)
     return oriented_vx, oriented_vy
 
-def circle(self, gyro, pwms):
-    pass
+def circle(gyro, pwms):
+    while True:
+        yield
 
-def square(self, gyro, pwms):
-    pass
+def square(gyro, pwms):
+    while True:
+        yield
     FORWARD = [1.0, 0,0]
     RIGHT = [0.0, -1.0]
     BACK = [-1.0, 0.0]
@@ -46,10 +49,4 @@ def square(self, gyro, pwms):
         last_time = time.time()
     else:
         self.commands.robot.drive(1.0, 1.0, 0.0, self.CARTESIAN_SCALE)
-        yield
-
-#example command
-def do_nothing_ten(pwms, gyro):
-    start = time.time()
-    while time.time() - start < 10:
         yield
