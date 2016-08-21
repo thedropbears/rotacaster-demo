@@ -6,7 +6,7 @@ from pwm import Pwm
 import pygame
 from pygame.locals import *
 from commands import *
-#from bno055 import BNO055
+from BNO055 import bno055
 import os, time
 
 MOTOR_A_PWM = "PWM0B-29"
@@ -24,10 +24,6 @@ button_map = {"a" : 0, "b" : 1, "x" : 2, "y" : 3, "left_button" : 4, "right_butt
 
 loop_speed = 1/50.0 #loop speed, seconds
 
-class DummyGyro(object):
-    def get_yaw(self):
-        return 0.0
-
 def main():
     pid = str(os.getpid())
     file("/var/run/rotacaster.pid", "w").write(pid)
@@ -38,8 +34,7 @@ def main():
     pwms = [pwm_a, pwm_b, pwm_c]
     for p in pwms:
         p.pwm_off()
-    # TODO: replace with real bno class
-    gyro = DummyGyro()
+    gyro = bno055(addr=0x28, busnum=1)
 
     os.environ["SDL_VIDEODRIVER"] = "dummy"
     pygame.init()
@@ -56,6 +51,8 @@ def main():
         #wait until we want to start next loop
         while time.time()-last_loop<loop_speed:
             pass
+
+        last_loop = time.time()
 
         active_buttons = [False for x in range(len(button_map))]
         for event in pygame.event.get():
@@ -76,7 +73,7 @@ def main():
         if (axis[axis_map["left_trigger"]] > DISABLE_THRESH
             or axis[axis_map["right_trigger"]] > DISABLE_THRESH
             or (time.time() - last_input > DISABLE_TIME 
-                and command is drive):
+                and command is drive)):
             command = None
             for p in pwms:
                 p.pwm_off()
@@ -112,8 +109,10 @@ def main():
                         rotation_locker if rotation_locker else axis[axis_map["right_stick_x"]],
                         1.0, gyro, pwms
                     )
-        else
+        else:
             command = command(gyro, pwms)
+
+        print bno055.get_heading()
 
 
 
