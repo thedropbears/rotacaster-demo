@@ -1,0 +1,14 @@
+Tested with Debian 8.4 2016-05-13.
+
+Clone/copy repo onto BBB.
+
+Install pygame:
+  apt-get install python-pygame
+
+Edit /etc/rc.local so that it starts at boot. Add (before the 'exit 0'):
+  /root/startup.sh &
+
+
+You can connect to the running process to get button presses, etc:
+python monitor.py
+

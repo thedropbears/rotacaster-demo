@@ -8,25 +8,35 @@ from pygame.locals import *
 from commands import *
 from BNO055 import bno055
 import os, time
+import logging, logging.handlers
 
 MOTOR_A_PWM = "PWM0B-29"
 MOTOR_B_PWM = "PWM1A-36"
 MOTOR_C_PWM = "PWM2A-45"
 
-CANCEL_COMMAND_DEAD_ZONE = 0.3
-DISABLE_THRESH = 0.1
+STICK_DEADZONE = 0.05
 DISABLE_TIME = 10
 
-axis_map = {"left_stick_x" : 0, "left_stick_y" : 1, "right_stick_x" : 2, "right_stick_y" : 3,
-            "left_trigger" : 4, "right_trigger" : 5}
+axis_map = {"left_stick_x" : 0, "left_stick_y" : 1, "right_stick_x" : 2, "right_stick_y" : 3}
 
-button_map = {"a" : 0, "b" : 1, "x" : 2, "y" : 3, "left_button" : 4, "right_button" : 5, "back" : 6, "start" : 7, "left_stick_press" : 9, "right_stick_press" : 10}
+button_map = {"a" : 1, "b" : 2, "x" : 0, "y" : 3,
+              "left_button" : 4, "right_button" : 5,
+              "left_trigger" : 6, "right_trigger" : 7,
+              "back" : 8, "start" : 9,
+              "left_stick_press" : 10, "right_stick_press" : 11}
 
 loop_speed = 1/50.0 #loop speed, seconds
 
 def main():
     pid = str(os.getpid())
     file("/var/run/rotacaster.pid", "w").write(pid)
+    # Setup network logging
+    rootlogger = logging.getLogger('')
+    rootlogger.setLevel(logging.DEBUG)
+    socket_handler = logging.handlers.SocketHandler('localhost',
+        logging.handlers.DEFAULT_TCP_LOGGING_PORT)
+    rootlogger.addHandler(socket_handler)
+    logger = logging.getLogger('rotacaster')
 
     pwm_a = Pwm(MOTOR_A_PWM)
     pwm_b = Pwm(MOTOR_B_PWM)
@@ -34,7 +44,7 @@ def main():
     pwms = [pwm_a, pwm_b, pwm_c]
     for p in pwms:
         p.pwm_off()
-    gyro = bno055(addr=0x28, busnum=1)
+    gyro = bno055(addr=0x28, busnum=2)
 
     os.environ["SDL_VIDEODRIVER"] = "dummy"
     pygame.init()
@@ -54,52 +64,68 @@ def main():
 
         last_loop = time.time()
 
-        active_buttons = [False for x in range(len(button_map))]
+        active_buttons = [False for x in range(max(button_map.values())+1)] # Zero indexed, so add one
         for event in pygame.event.get():
-                if event.type == JOYAXISMOTION:
-                    if event.axis < len(axis_map):
-                        axis[event.axis] = event.value
-                elif event.type == JOYBUTTONDOWN and event.button < len(button_map):
-                    active_buttons[event.button] = True
+            if event.type == JOYAXISMOTION:
+                if event.axis < len(axis_map):
+                    axis[event.axis] = event.value
+            elif event.type == JOYBUTTONDOWN and event.button < len(button_map):
+                logger.info("Button pressed: %i" % (event.button))
+                active_buttons[event.button] = True
+
+        if True in [abs(val)>STICK_DEADZONE for val in axis] or True in active_buttons:
+            last_input = time.time()
 
         # first check for enabling
         if (active_buttons[button_map["left_button"]]
             and active_buttons[button_map["right_button"]]):
+            logger.info("Enabled")
             command = drive
             for p in pwms:
                 p.pwm_on()
 
         # disable if we haven't moved the sticks in a while
-        if (axis[axis_map["left_trigger"]] > DISABLE_THRESH
-            or axis[axis_map["right_trigger"]] > DISABLE_THRESH
-            or (time.time() - last_input > DISABLE_TIME 
-                and command is drive)):
+        disable_buttons = (active_buttons[button_map["left_trigger"]] or
+            active_buttons[button_map["right_trigger"]])
+        timeout = (time.time() - last_input > DISABLE_TIME
+                and command is drive
+                and not rotation_locker)
+
+        if disable_buttons or timeout:
+            logger.info("Disabled")
             command = None
             for p in pwms:
                 p.pwm_off()
+            rotation_locker = 0.0
         
+        # reset gyro
+        if active_buttons[button_map["start"]]:
+            logger.info("Reset gyro")
+            gyro.reset_heading()
+
         if not command:
             continue
         
         # if we are moving the sticks
-        if True in map(lambda x: abs(x)>CANCEL_COMMAND_DEAD_ZONE, axis_map):
+        if True in [abs(val)>STICK_DEADZONE for val in axis]:
             command = drive
 
-        if True in map(lambda x: abs(x)>0.05, axis_map) or True in button_map:
-            last_input = time.time()
-
+        # lock/unlock rotation
         if active_buttons[button_map["right_stick_press"]]:
             if rotation_locker:
+                logger.info("Unlock rotation")
                 rotation_locker = 0.0
-            else:
+            elif abs(axis[axis_map["right_stick_x"]]) > STICK_DEADZONE * 2.0:
+                logger.info("Lock rotation")
                 rotation_locker = axis[axis_map["right_stick_x"]]
 
-
-
+        # run canned movement routines
         if active_buttons[button_map["a"]] and command is drive:
-            command = square
+            logger.info("Running square routine")
+            #command = square
         if active_buttons[button_map["b"]] and command is drive:
-            command = circle
+            logger.info("Running circle routine")
+            #command = circle
         
         # Run the particular command that is set
         if command is drive:
@@ -112,7 +138,7 @@ def main():
         else:
             command = command(gyro, pwms)
 
-        print bno055.get_heading()
+        #logger.debug(gyro.get_heading())
 
 
 
@@ -121,7 +147,9 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print e
+        import sys, traceback
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback)
         pa = Pwm(MOTOR_A_PWM)
         pb = Pwm(MOTOR_B_PWM)
         pc = Pwm(MOTOR_C_PWM)

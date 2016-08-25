@@ -1,6 +1,7 @@
 
 from Adafruit_I2C import Adafruit_I2C
 import math, sys
+import logging
 
 class bno055:
 
@@ -9,28 +10,29 @@ class bno055:
             addr = self.BNO055_ADDRESS_A
         self.addr = addr
         self.i2c = Adafruit_I2C(addr, busnum=busnum)
+        self.logger = logging.getLogger("BNO055")
 
         # set the units and the operation modes of the gyro
         try:
             # read the current units, then flip the appropriate bits
             # units that we set are all are or based off radians
             current_units = self.i2c.readU8(self.BNO055_UNIT_SEL_ADDR)
-            print "read"
+            self.logger.info("Found device")
             for unit_list in self.BNO055_UNIT_SEL_LIST:
                 if unit_list[0] == 1:
                     current_units = current_units | (1 << unit_list[1])
                 elif unit_list[0] == 0:
                     current_units = current_units & ~(1 << unit_list[1])
             self.i2c.write8(self.BNO055_UNIT_SEL_ADDR, current_units)
-            print "set"
+            self.logger.info("Set units")
             # set the operation mode
             self.i2c.write8(self.BNO055_OPR_MODE_ADDR, self.OPERATION_MODE_IMUPLUS)
-            print "set op mode"
+            self.logger.info("Set op mode")
             # reverse any axis that we may want to
             self.reverse_axis(False, False, False)
-            print "reversed axis"
+            self.logger.info("Reversed axes")
         except:
-            print "Error setting units for BNO055 device"
+            self.logger.error("Error setting units for BNO055 device")
         self.offset = 0.0
 
     def reverse_axis(self, x, y, z):
@@ -53,8 +55,9 @@ class bno055:
         except:
             pass
 
-    def reset_heading(self, heading=math.pi):
+    def reset_heading(self, heading=0.0):
         self.offset = self.get_raw_heading() - heading
+        self.logger.info("BNO055: offset reset")
 
     def get_euler(self, start_register):
         try:
@@ -65,7 +68,7 @@ class bno055:
             euler_signed = float(euler_unsigned) / 900.0
             return euler_signed
         except:
-            print "Error reading euler angle at register %s" % (start_register)
+            self.logger.error("Error reading euler angle at register %s" % (start_register))
             return 0.0
 
     def get_angles(self):

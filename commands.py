@@ -14,11 +14,11 @@ def drive(vX, vY, vZ, throttle, gyro, pwms):
 
     motor_input = [mA, mB, mC]
 
-    max = max(max(abs(i) for i in motor_input), 1.0)
+    maximum = max(max(abs(i) for i in motor_input), 1.0)
 
     # scale between -1 and 1, * by throttle, set speed
     for i in range(3):
-        motor_input[i] /= max
+        motor_input[i] /= maximum
         motor_input[i] *= throttle
         pwms[i].set_speed(motor_input[i])
     return drive
